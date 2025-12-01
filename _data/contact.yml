@@ -7,9 +7,9 @@
   icon: "fas fa-rocket"
   url: "https://juejin.cn/user/4054654615304157/posts"
 
-- type: tutotial
-  icon: "fas fa-book"
-  url: "/liaoxuefeng-en/site/"
+# - type: tutotial
+#   icon: "fas fa-book"
+#   url: "/liaoxuefeng-en/site/"
 
 
 # - type: twitter
