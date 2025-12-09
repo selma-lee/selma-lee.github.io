@@ -3,10 +3,6 @@
 - type: github
   icon: "fab fa-github"
 
-- type: juejin
-  icon: "fas fa-rocket"
-  url: "https://juejin.cn/user/4054654615304157/posts"
-
 # - type: tutotial
 #   icon: "fas fa-book"
 #   url: "/liaoxuefeng-en/site/"
@@ -28,9 +24,9 @@
 #   icon: 'fab fa-mastodon'   # icons powered by <https://fontawesome.com/>
 #   url:  ''                  # Fill with your Mastodon account page, rel="me" will be applied for verification
 #
-# - type: linkedin
-#   icon: 'fab fa-linkedin'   # icons powered by <https://fontawesome.com/>
-#   url:  ''                  # Fill with your Linkedin homepage
+- type: linkedin
+  icon: 'fab fa-linkedin'   # icons powered by <https://fontawesome.com/>
+  url:  'https://www.linkedin.com/in/selma-li-dev/'                  # Fill with your Linkedin homepage
 #
 # - type: stack-overflow
 #   icon: 'fab fa-stack-overflow'
@@ -47,3 +43,7 @@
 # - type: threads
 #   icon: 'fa-brands fa-threads'
 #   url: ''                   # Fill with your Threads profile link
+
+- type: juejin
+  icon: "fas fa-rocket"
+  url: "https://juejin.cn/user/4054654615304157/posts"
