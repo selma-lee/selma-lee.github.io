@@ -19,6 +19,7 @@ Steps:
     File extension analysis: if there is no file extension, according to the order of .js, .json, .node to fill > Optimization point: if it is a .node and .json file, when passed to the `require()` with the extension, it will speed up a little bit
 3. compile execution
     Create a new module object, load and compile according to the path - .js file: read the file synchronously through the fs module and then compile and execute it, during the compilation process, Node wraps the header and tail of the contents of the js file:
+
         ``` js
         (function (exports, reuire, module, __filename, __dirname) {
           // The contents of the file
@@ -29,7 +30,7 @@ Steps:
             // ...
           }
         })
-        ``
+        ```
     - .node files: these are extension module files written in C/C++ that don't need to be compiled, the `process.dlopen()` method loads the final compiled file and executes it. The `dlopen()` method has different implementations in windows and _nix platforms, it is encapsulated by libuv compatibility layer, in fact, it is compiled into a .dll file in windows, and into a .so file in _nix, but in order to look more natural, so the extension is unified as .node.
     - .json file: read the file synchronously through the fs module, and parse the result with `JSON.parse()`.
     - The rest of the extensions are treated as .js files.
@@ -103,13 +104,13 @@ It is basically the same as the normal file module, except for the difference in
 # 3 Shared modules for front and back end
 
 * CommonJS specification: `Node.JS` follows the `CommonJS` specification. `module.exports = xxx` exports, `require()` introduces. Synchronized loading of modules.
-* AMD: Requirejs' canonicalized output for module definitions, asynchronous module definitions, module loading does not affect the operation of statements following it, dependency fronting. ``define`` definition, ``require`` introduction.
+* AMD: Requirejs' canonicalized output for module definitions, asynchronous module definitions, module loading does not affect the operation of statements following it, dependency fronting. `define` definition, `require` introduction.
     ``` js
     require(['clock'],function(clock){
       clock.start();
     });
     ```
-* CMD: Seajs' normalized output for module definitions, synchronized module definitions, dependencies in close proximity. ``define`` definitions, ``require`` introductions.
+* CMD: Seajs' normalized output for module definitions, synchronized module definitions, dependencies in close proximity. `define` definitions, `require` introductions.
     ``` js
     define(function(require, exports, module) {
        var clock = require('clock');

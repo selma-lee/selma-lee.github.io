@@ -36,6 +36,7 @@ Here is a comparison with Web App and Native App:
 
 The essence of Hybrid App is to use WebView as a container to carry Web pages directly in the native App, which is also called "shell".
 Among them, the core point is the two-way communication layer between the Native end and the H5 end, which can be understood as we need a set of cross-language communication solutions to complete the communication between Native (Java/Objective-c/...) and JavaScript. JavaScript. This solution is __JSBridge__, and the key to realize is as a container of __WebView__, all the principles are based on the WebView mechanism.
+
 ![Hybrid App](/assets/img/2019/07/hybrid-app-1.jpg)
 
 > WebView is a webkit engine based , web page display control .
@@ -118,6 +119,7 @@ Next, let's look at the two-threaded mode of the applet.
 As shown in the figure below, the running environment of the applet is divided into a rendering layer and a logic layer, the WXML templates and WXSS styles work in the rendering layer, and the JS scripts work in the logic layer. The rendering layer and logic layer of the applet are managed by two threads: the rendering layer uses WebView for rendering the interface; the logic layer uses JsCore thread to run the JS scripts.
 There are multiple interfaces in an applet, so there are multiple WebView threads in the rendering layer. This makes the applet closer to the native experience and avoids overloading a single WebView.
 The communication between these two threads is relayed through the WeChat client (Native), and the logic layer sends network requests through Native.
+
 ![Small program dual-threaded model](/assets/img/2019/07/miniprogram.png)
 
 ## Reason
@@ -131,6 +133,7 @@ There are two main reasons for the separation of the rendering and logic layers 
 ## UI rendering
 
 Like RN, applets embody the idea of virtual DOM in page rendering.
+
 ![Applet page rendering](/assets/img/2019/07/miniprogram-dom.png)
 
 1. First of all, in the rendering layer, the host environment will convert the WXML can to JS object first, and then render the real Dom tree.
@@ -139,7 +142,8 @@ Like RN, applets embody the idea of virtual DOM in page rendering.
 
 In terms of the component system, most of the components of the applet are implemented by the Exparser component framework, and a small number of native components are involved in the rendering of the components by the client to provide better performance.
 For example, the native component map `<map latitude="39.92" longtitude="116.46"></map>`
-At actual runtime, the
+
+At actual runtime,
 
 1. The rendering layer webview creates the component, inserts it into the DOM tree and calculates the layout (position and width). 2.
 2. Notify the Native through the communication mechanism, the Native will insert a native region according to the layout and render it. 3.
@@ -163,12 +167,15 @@ In terms of the logic layer's native communication mechanisms with the client, t
 ## Developer Tools
 
 As mentioned above the separation of the rendering and logic layers also gives the possibility to run in different environments. In the developer tools, the logical layer actually uses a hidden <webview/> tag to emulate JSCore. And by localizing the BOM objects that are not supported in JSCore, it makes it impossible for developers to use the BOM normally in the applet code, thus avoiding unnecessary errors.
+
 In terms of communication mechanism, the developer tool maintains a WebSocket server at the bottom of the developer tool , used in the WebView and the developer tool to establish a reliable message communication link between the interface call , event notification , data exchange can be carried out normally , so that the applet simulator becomes a unified whole.
+
 Details can see the official website of the [WeChat developer tools](https://developers.weixin.qq.com/ebook?action=get_post_info&amp;docid=0000a24f9d0ac86b00867f43a5700a)
 
 ## Summary
 
 In the two-threaded model of the applet, the rendering layer is separated from the logic layer, which has the advantage of fast rendering and fast loading;
+
 However, any data transfer is inter-thread communication, which means there will be some delay. This can make the runtime sequencing of the various parts a bit more complicated. For details, see [Born with Latency](https://developers.weixin.qq.com/ebook?action=get_post_info&amp;docid=0006a2289c8bb0bb0086ee8c056c0a) on the official website.
 
 # Summarize
@@ -176,6 +183,7 @@ However, any data transfer is inter-thread communication, which means there will
 ## Common ground ##
 
 Both RN and applets have the advantages of hybrid technology, both "the advantages of good user interaction experience of Native App" and "the advantages of cross-platform development of Web App".
+
 In terms of framework, both use Web-related technologies to write business code; both implement a set of cross-language communication solutions to complete Native (Java/Objective-c/...) and JavaScript (which is divided into two parts in applets). end and JavaScript (small programs are divided into rendering layer and logic layer) communication.
 
 ## Difference ##

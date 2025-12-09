@@ -29,7 +29,9 @@ Hybrid App（混合模式移动应用）是指介于web-app、native-app这两�
 ## 技术原理
 Hybrid App的本质，其实是在原生的 App 中，使用 WebView 作为容器直接承载 Web页面，也有人说成是“套壳”。
 其中，最核心的点就是 Native端 与 H5端 之间的双向通讯层，也可以理解为我们需要一套跨语言通讯方案，来完成 Native(Java/Objective-c/...) 与 JavaScript 的通讯。这个方案就是 __JSBridge__，而实现的关键便是作为容器的 __WebView__，一切的原理都是基于 WebView 的机制。
+
 ![Hybrid App](/assets/img/2019/07/hybrid-app-1.jpg)
+
 
  > WebView是一个基于webkit引擎、展现web页面的控件。
 
@@ -45,7 +47,9 @@ Hybrid App的本质，其实是在原生的 App 中，使用 WebView 作为容�
 
 # React Native的底层框架
 ## 总体框架
+
 ![React Native](/assets/img/2019/07/react-native.jpeg)
+
  - js层
 该层提供了各种供开发者使用的组件以及一些工具库（事件分发等）。
  - C++层
@@ -91,7 +95,9 @@ RN既有Native的体验，又能使用前端开发者熟悉的React框架，并�
 如下图，小程序的运行环境分成渲染层和逻辑层，WXML 模板和 WXSS 样式工作在渲染层，JS 脚本工作在逻辑层。小程序的渲染层和逻辑层分别由2个线程管理：渲染层的界面使用了WebView 进行渲染；逻辑层采用JsCore线程运行JS脚本。
 一个小程序存在多个界面，所以渲染层存在多个WebView线程。这使得小程序更贴近原生体验，也避免了单个WebView的任务过于繁重。
 这两个线程的通信会经由微信客户端（Native）做中转，逻辑层发送网络请求也经由Native转发。
+
 ![小程序双线程模型](/assets/img/2019/07/miniprogram.png)
+
 
 ## 原因
 小程序的渲染层和逻辑层分离主要有两个原因：
@@ -101,13 +107,15 @@ RN既有Native的体验，又能使用前端开发者熟悉的React框架，并�
 
 ## UI渲染
 与RN一样，小程序在页面渲染上也体现了虚拟DOM的思想。
+
 ![小程序页面渲染](/assets/img/2019/07/miniprogram-dom.png)
+
 1. 首先，在渲染层，宿主环境会把WXML可以先转成JS对象，然后再渲染出真正的Dom树。
 2. 在逻辑层发生数据变更的时候，我们需要通过宿主环境提供的setData方法把数据从逻辑层传递到渲染层，
 3. 再经过对比前后差异，把差异应用在原来的Dom树上，渲染出正确的UI界面。
 
-在组件系统方面，小程序的大部分组件由Exparser组件框架实现，小部分原生组件由客户端参与组件的渲染，以提供更好的性能。
-比如原生组件map``` <map latitude="39.92" longtitude="116.46"></map> ```
+在组件系统方面，小程序的大部分组件由Exparser组件框架实现，小部分原生组件由客户端参与组件的渲染，以提供更好的性能。比如原生组件map `<map latitude="39.92" longtitude="116.46"></map>`
+
 在实际运行时，
  1. 渲染层webview创建组件，插入到DOM树中后计算布局（位置与宽高）。
  2. 通过通信机制通知Native，Native会根据布局插入一块原生区域并渲染。

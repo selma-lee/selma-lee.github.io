@@ -21,7 +21,9 @@ JavaScript单线程任务被分为同步任务和异步任务。
 - 同步任务会在执行栈中按照顺序等待主线程依次执行
 - 异步任务会进入Event Table并注册函数。当指定的事情完成时，Event Table会将这个函数移入任务队列中。等待主线程空闲的时候（执行栈被清空），任务队列的任务按顺序被读取到栈内等待主线程的执行。
 如图：
+
 ![同步任务和异步任务](/assets/img/2019/02/eventloop-1.png)
+
 
 ## 宏任务和微任务
 除了广义的同步任务和异步任务，我们对任务有更精细的定义。在高层次上，JavaScript中有宏任务（MacroTask）和微任务（MicroTask）。
@@ -30,7 +32,9 @@ JavaScript单线程任务被分为同步任务和异步任务。
 
 JS 引擎首先在宏任务队列中取出第一个任务`执行script`，执行完毕后取出微任务队列中的所有任务顺序执行；之后再取宏任务，如此循环，直至两个队列的任务都取完。
 如图：
+
 ![宏任务和微任务](/assets/img/2019/02/eventloop-2.png)
+
 
 ## 总的来说
  1. 整体script作为第一个宏任务进入主线程。
@@ -153,12 +157,16 @@ setTimeout
 Node.js 最大的特点就是使用 __异步式 I/O__ 与 __事件驱动__ 的架构设计。
 对于高并发的解决方案，传统的架构是多线程模型，而Node.js 使用的是 __单线程__ 模型，对于所有 I/O 都使用非阻塞的异步式的请求方式，避免了频繁的线程切换。__异步式I/O__ 是这样实现的：由于大多数现代内核都是多线程的，所以它们可以处理在后台执行的多个操作。Node.js 在执行的过程中会维护一个事件队列，程序在执行时进入 __事件循环__ 等待下一个事件到来。当事件到来时，事件循环将操作交给系统内核，当一个操作完成后内核会告诉Nodejs，对应的回调会被推送到事件队列，等待程序进程进行处理。
 ### Nodejs的架构
+
 ![nodejs架构](/assets/img/2019/02/nodejs-1.jpg)
+
 Node.js使用V8作为JavaScript引擎，使用高效的libev和libeio库支持事件驱动和异步式 I/O。Node.js的开发者在libev和libeio的基础上还抽象出了层libuv。对于POSIX1操作系统，libuv通过封装libev和libeio来利用 epoll 或 kqueue。在 Windows下，libuv 使用了 Windows的 IOCP机制，以在不同平台下实现同样的高性能。
 Event Loop就是在libuv中实现的。
  > epoll、kqueue、IOCP都是多路复用IO接口，即支持多个同时发生的异步I/O操作的应用程序编程接口。其中epoll为Linux独占，而kqueue则在许多UNIX系统上存在，包括Mac OS X。
 ### Nodejs的运行机制
+
 ![nodejs运行机制](/assets/img/2019/02/nodejs.png)
+
 Node.js的运行机制如下:
  - V8 引擎解析 JavaScript 脚本。
  - 解析后的代码，调用 Node API。
@@ -279,7 +287,9 @@ timeout
  - Node 端，microtask 在事件循环的各个阶段之间执行
  - 浏览器端，microtask 在事件循环的 macrotask 执行完之后执行
 
+
 ![Nodejs与浏览器的Event Loop差异](/assets/img/2019/02/eventloop-3.png)
+
 
 举个例子：
 ``` js
@@ -297,7 +307,9 @@ setTimeout(()=>{
 }, 0)
 ```
 浏览器端运行结果：
+
 ![浏览器端运行结果：](/assets/img/2019/02/eventloop-browser.gif)
+
 ``` bash
 timer1
 promise1
@@ -306,7 +318,9 @@ promise2
 ```
 
 node端（v10.15.1)运行结果
+
 ![node端运行结果：](/assets/img/2019/02/eventloop-node.gif)
+
 ``` bash
 timer1
 timer2

@@ -120,7 +120,9 @@ Webpack later also supported Tree-shaking, which is widely used in medium and la
 # ESM specification native support, esbuild and vite
 
 esbuild supports ES6/CommonJS specifications, Tree Shaking, TypeScript, JSX and other features.
+
 ![esbuild](/assets/img/2023/08/esbuild.png)
+
 
 You can see that compared to webpack, you can see that the performance is improved by a hundred times. Why so fast?
 
@@ -133,7 +135,9 @@ Why use rollup for production builds?
 
 * Due to browser compatibility issues and the use of ESM in the actual network may cause the RTT time to be too long, packaging and building are still required .
 
+
 ![caniuse](/assets/img/2023/08/caniuse.png)
+
 
 * Although esbuild is fast, it has not yet released the 1.0 stable version. In addition, esbuild has weak support for code splitting and css processing, so rollup is still used in production environments.
 

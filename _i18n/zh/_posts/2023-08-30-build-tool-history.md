@@ -7,6 +7,7 @@ categories: build-tool
 ---
 
 本文旨在解答：前端项目为什么需要构建打包？构建工具为什么需要更新迭代，又是如何演变成现在这样的？
+
 ![构建工具发展简史](/assets/img/2023/08/module-history.png)
 <!--more-->
 # 无模块化时代
@@ -112,6 +113,7 @@ Webpack后来也支持Tree-shaking，在中大型项目中使用得非常广泛�
 
 # ESM 规范原生支持，esbuild和vite
 esbuild 支持 ES6/CommonJS 规范、Tree Shaking、TypeScript、JSX 等功能特性。
+
 ![esbuild](/assets/img/2023/08/esbuild.png)
 
 可以看到，对比webpack，可以看到性能足有百倍的提升。为什么这么快呢？
@@ -123,7 +125,9 @@ Vite是下一代前端开发与构建工具。在开发环境和生产环境分�
 为什么在生产环境中构建使用 rollup？
 
  - 由于浏览器的兼容性问题以及实际网络中使用 ESM 可能会造成 RTT 时间过长，所以仍然需要打包构建。
+
 ![caniuse](/assets/img/2023/08/caniuse.png)
+
  - esbuild 虽然快，但是它还没有发布 1.0 稳定版本，另外 esbuild 对代码分割和 css 处理等支持较弱，所以生产环境仍然使用 rollup。
 
 # 参考

@@ -47,12 +47,14 @@ layout: default
 {% endif %}
 
 <div id="post-list" class="flex-grow-1 px-xl-1">
+  
+  {% if site.lang == "en" %}
+    {% assign lang_prefix = "" %}
+  {% else %}
+    {% assign lang_prefix = "/" | append: site.lang %}
+  {% endif %}
+
   {% for post in posts %}
-    {% if site.lang == "en" %}
-      {% assign lang_prefix = "" %}
-    {% else %}
-      {% assign lang_prefix = "/" | append: site.lang %}
-    {% endif %}
     <article class="card-wrapper card">
       <a href="{{ lang_prefix }}{{ post.url | relative_url }}" class="post-preview row g-0 flex-md-row-reverse">
         {% assign card_body_col = '12' %}

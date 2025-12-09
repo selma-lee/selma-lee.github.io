@@ -17,6 +17,7 @@ categories:
 ## 1.1 `canvas`截帧
 利用`<video>`标签播放视频，再利用`videoObject.currentTime=seconds`设置到指定时刻播放，最后在`<canvas>`中进行绘制图片。有一个相关的[开源库](https://github.com/zzarcon/video-snapshot)，可以体验下它的[demo](https://zzarcon.github.io/video-snapshot/)。
 但是，`<video>`支持视频封装格式有限，[只支持MP4、WebM和Ogg](https://developer.mozilla.org/zh-CN/docs/Web/Media/Formats/Video_codecs)。这与业务现网的逻辑不一致，mov、flv等格式不能上传，不能达到上线标准。
+
 ![canvas-video](/assets/img/2021/08/canvas.png)
 
 ## 1.2 `Webassembly`截帧
@@ -31,9 +32,12 @@ categories:
  - [@ffmpeg/ffmpeg](https://github.com/ffmpegwasm/ffmpeg.wasm)：实现了调用上一步生成的胶水代码的部分，提供了load, run等API。同时，如果开发者对@ffmpeg/core不满意，也可以构建自定义的ffmpeg-core.wasm。
 
 ![@ffmpeg/ffmpeg](/assets/img/2021/08/ffmpeg-wasm.png)
+
 那么，能直接用吗？有这些问题还待解决：
  - 浏览器兼容性：我们知道，浏览器的js线程是单线程的，并且与渲染线程互斥。为了不阻塞页面的渲染和js主线程，`@ffmpeg/core`在编译ffmpeg时，配置了[多线程](https://emscripten.org/docs/porting/pthreads.html)，导致产生的js胶水代码中使用了`sharedarraybuffer`。[`sharedarraybuffer`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer)能满足主线程和worker之间的数据共享，也可以满足多个worker之间的数据共享，用于此场景中是很理想的。但是，因为[安全问题](https://meltdownattack.com/)，所有主流浏览器均默认禁用，需要另外配置一些返回头部字段，而且[支持度不太理想](https://caniuse.com/?search=sharedarraybuffer)，不能达到上线标准。
+ 
  ![SharedArrayBuffer](/assets/img/2021/08/sharedarraybuffer.png)
+
  - wasm冗余：`@ffmpeg/core`编译出来的`ffmpeg-core.wasm`几乎包括了ffmpeg的所有功能，[文件](https://unpkg.com/@ffmpeg/core@0.10.0/dist/ffmpeg-core.wasm)大小是24MB（gzip后是8.5MB），其中很多是截帧不需要的。
 
 ### 1.3.2 其他平台的实现
@@ -76,6 +80,7 @@ docker run \
 ### 2.1.1 了解下emscripten原理
 具体来说，就是C/C++等语言，经过 clang 前端变成 LLVM 中间代码（IR），再从LLVM IR到wasm。然后浏览器把 WebAssembly 下载下来，然后先经过 WebAssembly 模块，再到目标机器的汇编代码，再到机器码（x86/ARM等）。
 
+
 ![img](/assets/img/2021/08/emscripten.jpg)
 
 那，LLVM和Clang是什么呢？
@@ -83,6 +88,7 @@ docker run \
  - Clang是LLVM的一个子项目，基于LLVM架构的C/C++/Objective-C编译器前端。
 
 ![img](/assets/img/2021/08/llvm.jpg)
+
 >  - Frontend前端：词法分析、语法分析、语义分析、生成中间代码
 >  - Optimizer优化器：中间代码优化（循环优化、删除无用代码等等）
 >  - Backend后端：生成目标代码。如目标代码是绝对指令代码（机器码），则这种目标代码可立即执行。如果目标代码是汇编指令代码，则需汇编器汇编之后（生成机器码）才能运行。
@@ -201,6 +207,7 @@ const ffmpeg = createFFmpeg({ log: true });
 ```
 
 期间，还发现了`-ss`放在`-i`前，可以截取指定时间的帧，而不用等待逐帧读取，可以提升截图速度。可查看相关[API文档](https://ffmpeg.org/ffmpeg.html)。
+
 ![ffmpeg文档](/assets/img/2021/08/ffmpeg-api.png)
 
 P.S.`@ffmpeg/ffmpeg`目前还不支持加载去掉`pthreads`的ffmpeg-core.wasm+js，也给该库提了[pr](https://github.com/ffmpegwasm/ffmpeg.wasm/pull/235)。
@@ -253,6 +260,7 @@ module.exports = {
 
 # 4 web worker
 因为在构建中没有配置`-s USE_PTHREADS=1 `，上面调用`ffmpeg`的方法会阻塞js主线程和页面的渲染。比如，在生成推荐封面的同时，无法更新上传视频的进度状态，用户点击页面上的其他按钮也无法响应等。因此，需要增加一个web worker来运行。
+
 [`Web Worker`](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Workers_API/Using_web_workers)是在与浏览器页面线程分开的线程上运行的脚本，可以用于从页面线程分流几乎所有繁重的处理。主线程和worker可以通过`postMessage()`方法和`onmessage`事件进行通信。
 
 但使用`postMessage()`方法和`onmessage`事件进行编写通信过程会使代码显得繁琐。这里推荐使用[`Comlink`](https://github.com/GoogleChromeLabs/comlink) (1.1kB)，使代码变得更友好，让通信变得无感知。
@@ -329,12 +337,12 @@ const getVideoInfo = async (file) => {
   await ffmpeg.run('-i', 'example.mp4', '-loglevel', 'info');
 }
 ```
+ 
  ![firefox](/assets/img/2021/08/firefox.png)
 
 目前想到的方案是，使用[WORKERFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#filesystem-api-workerfs)。WORKERFS运行在 Web Worker 中，提供对 woker 内部的 File 和 Blob 对象的只读访问，而无需将整个数据复制到内存中，符合我们的需求。
+ 
  ![workerfs](/assets/img/2021/08/workerfs.png)
-
-
 
 # 参考
  - [Build FFmpeg WebAssembly version (= ffmpeg.wasm): Part.2 Compile with Emscripten](https://jeromewu.github.io/build-ffmpeg-webassembly-version-part-2-compile-with-emscripten/)

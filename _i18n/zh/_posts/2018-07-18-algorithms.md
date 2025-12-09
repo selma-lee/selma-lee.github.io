@@ -17,7 +17,9 @@ categories: algorithm
  3. 然后对左右两侧不断重复这个过程，直到所有排序完成。
 
 如下图的例子：
+
 ![快速排序](/assets/img/2018/07/quickSort-1.jpeg)
+
 用递归的思想可以这样实现，时间复杂度O(nlog2n)
 ``` js
 function quickSort(arr) {
@@ -43,7 +45,9 @@ quickSort(arr, 0, arr.length - 1)
 但是，这个实现的方法声明了一些数组，空间复杂度较大，内存占用较多。
 下面是更好的原地排序的实现方法。
 先看动图
+
 ![快速排序](/assets/img/2018/07/quickSort-2.gif)
+
 具体实现：
 ``` js
 function partition(arr, left, right) {

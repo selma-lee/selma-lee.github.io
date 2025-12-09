@@ -12,7 +12,9 @@ categories:
 ## 键盘遮挡影响布局
 坑：ios下fixed属性失效。在编辑框输入内容时会弹出软键盘，而手机屏幕区域有限往往会遮住输入界面。
 如下面截图，图片来自[%幻#影% - 博客园](https://www.cnblogs.com/cmblogs/p/4448336.html)
+
 ![键盘遮挡影响布局](/assets/img/2016/11/experience-1-2.jpg)
+
 fix：
  - 方法一：css 设置flex:1
 ``` css
@@ -56,7 +58,9 @@ iframe {
 
 ## 图片边缘出现截断情况
 坑：在plus机上出现图片边缘截断情况。图标像素是奇数，前辈说移动端的图标都要求是偶数才不会出现问题。
+
 ![图片边缘截断](/assets/img/2016/11/experience-1-1.jpeg)
+
 fix：编辑图像大小，改成偶数咯
 P.S.也有可能是用了rem的缘故。较小的背景图（比如一些 icon）的 background-size 不要使用具体 rem 数值，裁剪后会出现边缘丢失。应使用与元素等尺寸切图，设定 background-size: contain|cover 来缩放。
 
