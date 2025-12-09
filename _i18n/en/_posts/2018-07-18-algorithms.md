@@ -1,24 +1,32 @@
 ---
 layout: post
-title: 《数据结构与算法JavaScript描述》算法部分学习心得
+title: Study Tips for the Algorithms Section of the JavaScript Description of Data Structures and Algorithms
 date: 2018-07-18 22:49:20
-tags: [算法]
+tags: [Algorithm]
 categories: algorithm
 ---
-## 导言
-最近读了《数据结构与算法JavaScript描述》，除去书中一些代码错误之外，是一本让我有所收获的书。这里会说一些书中提及的算法及一点自己的理解，希望以后能熟练运用这些算法解决更复杂的问题。
-<!-- more -->
-## 排序算法
-### 快速排序
-快速排序是处理大数据集最快的排序算法之一。很多编程语言的排序函数都用到了快速排序，比如Chrome 的 JavaScript 引擎V8的`Array.sort()`就使用快速排序和插入排序的结合。
-快速排序的算法简单描述：
- 1. 先确定一个“支点”（pivot）
- 2. 将所有小于“支点”的值都放在该点的左侧，大于“支点”的值都放在该点的右侧
- 3. 然后对左右两侧不断重复这个过程，直到所有排序完成。
 
-如下图的例子：
-![快速排序](/assets/img/2018/07/quickSort-1.jpeg)
-用递归的思想可以这样实现，时间复杂度O(nlog2n)
+## Introduction
+
+I recently read "JavaScript Description of Data Structures and Algorithms", and apart from some code errors in the book, it was a book that gave me something to work with. Here I will talk about some of the algorithms mentioned in the book and a little bit of my own understanding, I hope that in the future I can skillfully use these algorithms to solve more complex problems.
+
+<!-- more -->
+
+## Sorting algorithms ##
+
+### Rapid sort
+
+Quick sort is one of the fastest sorting algorithms for handling large data sets. Many sorting functions in programming languages use quick sort, such as `Array.sort()` in Chrome's JavaScript engine V8, which uses a combination of quick sort and insertion sort.
+The algorithm for quick sort is briefly described:
+
+1. determine a "pivot point" (pivot)
+2. Place all values less than the pivot point on the left side of the point, and all values greater than the pivot point on the right side of the point.
+3. Repeat this process for the left and right sides until all sorting is complete.
+
+The example below:
+! [Quick Sort](/assets/img/2018/07/quickSort-1.jpeg)
+Using the idea of recursion it can be realized like this with time complexity O(nlog2n)
+
 ``` js
 function quickSort(arr) {
   if (arr.length <= 1) {
@@ -40,11 +48,13 @@ function quickSort(arr) {
 const arr = [2,1,4,5,8,3]
 quickSort(arr, 0, arr.length - 1)
 ```
-但是，这个实现的方法声明了一些数组，空间复杂度较大，内存占用较多。
-下面是更好的原地排序的实现方法。
-先看动图
-![快速排序](/assets/img/2018/07/quickSort-2.gif)
-具体实现：
+
+However, this implementation declares a number of arrays, which has a higher space complexity and memory footprint.
+Here is a better implementation of sort-in-place.
+Let's start with the motion picture
+! [Quick Sort](/assets/img/2018/07/quickSort-2.gif)
+Specific implementation:
+
 ``` js
 function partition(arr, left, right) {
   const pivot = arr[left] // 支点
@@ -74,10 +84,14 @@ function swap (a, b) {
   a = temp
 }
 ```
-## 检索算法
-### 顺序查找
-对于查找数据来说，顺序查找是最容易理解的方法，也属于暴力查找技巧的一种，适合于元素随机排列的数组。
-具体实现如下，时间复杂度O(n)
+
+## Retrieval algorithm
+
+### Sequential search
+
+For finding data, sequential lookup is the easiest method to understand, and also belongs to one of the violent lookup techniques, suitable for arrays with elements randomly arranged.
+The specific implementation is as follows, with time complexity O(n)
+
 ``` js
 function seqSearch(arr, data) {
   for (let i = 0, len = arr.length; i < len; i++) {
@@ -88,8 +102,10 @@ function seqSearch(arr, data) {
   return -1
 }
 ```
-因为在执行查找时可能会访问到数据结构里的所有元素，这种查找方法效率较低，尤其是数据量较大的情况下。
-有一种优化的方法是使用自组织数据。这种策略具体是：通过将频繁查找到的元素置于数据集的起始位置来最小化查找次数。我们可以在程序运行过程中由程序自动组织数据，如下面的例子：
+
+Because all elements in the data structure may be accessed when performing a lookup, this method of lookup is less efficient, especially with larger amounts of data.
+One optimized approach is to use self-organizing data. This strategy is specifically: minimize the number of lookups by placing frequently looked-up elements at the beginning of the dataset. We can have the program automatically organize the data as it runs, as in the following example:
+
 ``` js
 // 对于未排序数组，使用自组织数据，并通过简单的顺序查找快速找到元素
 function seqSearch(arr, data) {
@@ -104,14 +120,18 @@ function seqSearch(arr, data) {
   return -1
 }
 ```
-### 二分查找算法
-而对于有序的数据，二分查找算法比顺序查找算法更高效。
-二分查找算法简单描述：
- 1. 将数组的第一个位置设置为下边界，最后一个元素设置为上边界
- 2. 若下边界小于等于上边界则将中点(mid)设置为(上边界 + 下边界) / 2
- 3. 如果mid小于查询值，则将下边界设置为 mid + 1，重复步骤2、3；如果mid大于查询值，则将上边界设置为mid - 1，重复步骤2、3；否则返回mid
 
-具体实现如下，时间复杂度O(log2n)。
+### Dichotomous search algorithm ###
+
+And for ordered data, bisection lookup algorithm is more efficient than sequential lookup algorithm.
+Simple description of bisection lookup algorithm:
+
+1. set the first position of the array to the lower boundary and the last element to the upper boundary
+2. if the lower boundary is less than or equal to the upper boundary, set the midpoint (mid) to (upper boundary + lower boundary) / 2
+3. if mid is less than the query value, set the lower boundary to mid + 1, repeat steps 2 and 3; if mid is greater than the query value, set the upper boundary to mid - 1, repeat steps 2 and 3; otherwise, return mid
+
+It is implemented as follows with time complexity O(log2n).
+
 ``` js
 function binSearch(arr, data) {
   const upperBound = arr.length - 1
@@ -129,9 +149,13 @@ function binSearch(arr, data) {
   return -1
 }
 ```
-对于查找频繁的无序数据集，可以先进行一次快速排序然后实现二分查找算法。
-### 数组去重
-我们经常会遇到要对数组去重的情况。最容易理解的实现是遍历数组，进行顺序查找。具体实现如下，时间复杂度O(n^2)。
+
+For unordered datasets with frequent lookups, you can perform a quick sort and then implement the binary lookup algorithm.
+
+### Array de-duplication
+
+We often encounter situations where we have to de-weight an array. The easiest to understand implementation is to traverse the array and perform a sequential lookup. The implementation is as follows, with time complexity O(n^2).
+
 ``` js
 function unique(arr) {
   let uqArr = []
@@ -143,7 +167,9 @@ function unique(arr) {
   return uqArr
 }
 ```
-时间复杂度更低的实现方式是利用散列表结构，但空间复杂度较高，用空间换时间。具体实现如下，时间复杂度O(n)。
+
+A lower time complexity implementation is to utilize a hash table structure, but with a higher space complexity, trading space for time. The specific implementation is as follows, with time complexity O(n).
+
 ``` js
 function uniqueHash(arr) {
   let hash = {}
@@ -159,7 +185,9 @@ function uniqueHash(arr) {
   return uqArr
 }
 ```
-在上面的基础上，用开链法区分数据类型，解决如果数组的某元素是`__proto__`和碰撞的问题。
+
+Building on the above, the open chaining method is used to distinguish between data types, solving the problem if an element of the array is `__proto___` and collisions.
+
 ``` js
 function uniqueHash2(arr) {
   let hash = Object.create(null)
@@ -175,14 +203,19 @@ function uniqueHash2(arr) {
   return uqArr
 }
 ```
-## 高级算法
-### 动态规划
-我们可以通过与递归比较来理解动态规划：
- - 递归：从顶部开始将问题分解，通过解决掉所有分解出小问题的方式，来解决整个问题
- - 动态规划：从底部开始解决问题，将所有小问题解决掉，然后合并成一个整体解决方案，从而解决掉整个大问题
 
-下面看一个简单的例子：
-要实现斐波那契数列(0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55…)的计算，用递归的思想可以这样实现：
+## Advanced algorithms
+
+### Dynamic programming ###
+
+We can understand dynamic programming by comparing it with recursion:
+
+* Recursion: start from the top to decompose the problem, by solving all the decomposition out of small problems, to solve the whole problem
+* Dynamic Programming: start solving the problem from the bottom, solve all the small problems, and then merge them into an overall solution to solve the whole big problem.
+
+Look at a simple example below:
+To implement the Fibonacci series (0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55...), using the idea of recursion it can be implemented like this:
+
 ``` js
 function recurFib(n) {
   if (n < 2) {
@@ -192,8 +225,10 @@ function recurFib(n) {
   }
 }
 ```
-这是较容易理解的一种实现方式。但是，我们会发现，太多值在递归调用中被重新计算，当要计算的n较大时，执行效率很低。
-这时，我们可以发现这个“大问题”是可以通过解决若干个“小问题”来解决的。而解决“小问题”有一个固定的公式，就是：`Fib(n) = Fib(n - 1) + Fib(n - 2)`。从而想到，用动态规划来实现：
+
+This is one of the easier implementations to understand. However, we will find that too many values are recalculated in the recursive call, and when the n to be calculated is large, the implementation is inefficient.
+At this point, we can find that this "big problem" can be solved by solving a number of "small problems" to solve. There is a fixed formula for solving "small problems", which is: `Fib(n) = Fib(n - 1) + Fib(n - 2)`. From there, I thought of using dynamic programming to realize it:
+
 ``` js
 function dynFib(n) {
   if (n < 3) {
@@ -210,12 +245,15 @@ function dynFib(n) {
   }
 }
 ```
-这种实现方式用数组保存了中间结果，效率更高。
-以后遇到能用递归解决的问题，如果有子问题结构，可以考虑尝试用动态规划解决。
 
-### 贪心算法
-贪心算法的策略是：总是会选择当下的最优解，而不去考虑这一次的选择会不会对未来的选择造成影响。通过做出一系列的局部“最优”选择，有可能带来最终的整体“最优”选择，也有可能是“次优”选择。
-下面是商店找零的例子，最优解是令使用的硬币数最少。
+This implementation saves the intermediate results with an array, which is more efficient.
+In the future, when you encounter a problem that can be solved with recursion, you may consider trying to solve it with dynamic programming if there is a subproblem structure.
+
+### The greedy algorithm ##
+
+The greedy algorithm's strategy is to always choose the optimal solution for the moment, without considering whether this choice will have an impact on future choices. By making a series of locally "optimal" choices, it is possible to arrive at an overall "optimal" choice, or a "suboptimal" choice.
+Here is an example of making change at a store, where the optimal solution is to minimize the number of coins used.
+
 ``` js
 function makeChange(money) {
   let coins = []
@@ -239,11 +277,12 @@ function makeChange(money) {
   console.log(coins[3] + '个25美分')
 }
 ```
-在这种情况下，这种方案总是能找到最优解。但如果硬币的面额改为：.25, .6, .5, .3, .1。当遇到1时，按照贪心算法将分解为`.6 + .3 + .1`，而最优解应该是`.5 * 2`。
-这里只举出几个简单的例子，关于动态规划和贪心算法还有更多的应用场景，这里不一一叙述了。
 
+In this case, this scheme always finds the optimal solution. However, if the denomination of the coin is changed to: .25, .6, .5, .3, .1. When 1 is encountered, according to the greedy algorithm it will decompose to `.6 + .3 + .1`, and the optimal solution should be `.5 * 2`.
+Here are just a few simple examples. There are many more applications of dynamic programming and greedy algorithms, so I won't describe them all here.
 
-## 参考
- - 《数据结构与算法JavaScript描述》
- - [JavaScript专题之解读 v8 排序源码](https://github.com/mqyqingfeng/Blog/issues/52)
- - v8 array源码 (https://github.com/v8/v8/blob/master/src/js/array.js)
+## Reference
+
+* JavaScript Description of Data Structures and Algorithms
+* [JavaScript Topic of Interpreting v8 sort source code](https://github.com/mqyqingfeng/Blog/issues/52)
+* v8 array source code (https://github.com/v8/v8/blob/master/src/js/array.js)

@@ -1,155 +1,132 @@
 ---
 layout: post
-title: 《深入浅出nodejs》学习总结之模块机制
+title: The Module Mechanism in nodejs - A summary of the learning process
 date: 2020-02-01 14:09:10
 tags: [NodeJs]
 categories:
  - backend
 ---
 
-# 1 模块实现
+# 1 Module realization
 
-步骤：
+Steps:
 
 <!-- more -->
-1. 路径分析
 
-   优先级：核心模块的缓存检查>文件模块的缓存检查>核心模块>文件模块
+1. Path analysis
+    Priority: cache checking for core modules > cache checking for file modules > core modules > file modules file modules with relative paths > absolute paths > file modules in non-path form (third-party file modules, i.e., modules in node_modules)
+2. file location
+    File extension analysis: if there is no file extension, according to the order of .js, .json, .node to fill > Optimization point: if it is a .node and .json file, when passed to the `require()` with the extension, it will speed up a little bit
+3. compile execution
+    Create a new module object, load and compile according to the path - .js file: read the file synchronously through the fs module and then compile and execute it, during the compilation process, Node wraps the header and tail of the contents of the js file:
+        ``` js
+        (function (exports, reuire, module, __filename, __dirname) {
+          // The contents of the file
+          // Introducing dependencies
+          var math = require('math')
+          // Exporting
+          exports.area = function() {
+            // ...
+          }
+        })
+        ``
+    - .node files: these are extension module files written in C/C++ that don't need to be compiled, the `process.dlopen()` method loads the final compiled file and executes it. The `dlopen()` method has different implementations in windows and _nix platforms, it is encapsulated by libuv compatibility layer, in fact, it is compiled into a .dll file in windows, and into a .so file in _nix, but in order to look more natural, so the extension is unified as .node.
+    - .json file: read the file synchronously through the fs module, and parse the result with `JSON.parse()`.
+    - The rest of the extensions are treated as .js files.
 
-   文件模块中，相对路径>绝对路径>非路径形式的文件模块（第三方文件模块，即node_modules中的模块）
-2. 文件定位
+# 2 Classification of Modules
 
-   文件扩展名分析：如果没有文件扩展名，按.js,.json,.node的次序补足
+The modules are divided into two categories:
 
-   > 优化点：如果是.node和.json文件，在传递给`require()`时带上扩展名，会加快一点速度
+* :: One category is Node-supplied modules, i.e., **core modules**.
+* :: The other is user-written modules, namely, **file modules**.
 
-3. 编译执行
+## 2.1 Core modules
 
-   新建一个模块对象，根据路径载入并编译
+Core modules are compiled into binary executable files during the compilation of the Node source code. When the Node process starts, some of the core modules are loaded directly into memory, which is much faster than the ordinary file modules from the disk to find one by one. So when the core module is introduced, the two steps of file location and compilation can be omitted, and the path analysis is prioritized, so the loading speed is the fastest!
 
-   - .js文件：通过fs模块同步读取文件后编译执行，编译过程中，Node对js文件内容进行头尾包装：
+The core module is divided into two parts:
 
-     ``` js
-     (function (exports, reuire, module, __filename, __dirname) {
-       // 文件内容
-       // 引入依赖
-       var math = require('math')
-       // 输出
-       exports.area = function() {
-         // ...
-     	}
-     })
-     ```
+**1. Built-in modules (written in C/C++)**
 
-   - .node文件：这是用C/C++编写的扩展模块文件，不需要编译，直接通过`process.dlopen()`方法加载最后编译生成的文件然后执行。`dlopen()`方法在windows和 *nix 平台有不同的实现，通过libuv兼容层进行了封装，实际上在windows编译成.dll文件，在 *nix编译成.so文件，但为了看起来更自然一点所以扩展名统一为.node。
+In the [src](https://github.com/nodejs/node/tree/master/src) directory of the Node project, hereafter referred to as built-in modules. Performance is superior to scripting languages.
 
-   - .json文件：通过fs模块同步读取文件后，用`JSON.parse()`解析返回结果
+* :: Compilation: pre-compiled into a binary file. The `node_extensions.h` file unifies these hashed built-in modules into an array called `node_module_list`.
+* Load: Use the `get_builtin_module()` method to retrieve them from the `node_module_list`, execute the
 
-   - 其余扩展名文件被当作.js文件处理
+**2. js core module (written in js)**
 
+It's in the [lib](https://github.com/nodejs/node/tree/master/lib) directory of the Node project. One class is used as a wrapping and bridging layer for C/C++ built-in modules; the other class is purely functional modules, which don't have to deal with the underlying layers, but are very important.
 
+* :: Compilation: Node uses js2c.py, which comes with V8, to convert all js core modules into a C++ array of strings (the strings are the contents of the js core module files) to generate the `node_natives.h` header file. As mentioned above the process of compiling .js files undergoes header and tail wrapping, and differs from the file module as stated in 2.2.2 in the following ways: the way the source code is fetched (the core modules are loaded from memory) and the location where the execution results are cached.
+* Load: take out the above array of strings via `process.binding('natives')` and place it in `nativeModule._source`. Load it directly from memory and execute it. _[P25]_
+    `` js
+    nativeModule._source = process.binding('natives')
+    ```
 
-# 2 模块分类
+## 2.2 Core module introduction process
 
-模块分为两类：
+In the core modules, some modules are all written in C/C++; some modules have the core part done by C/C++, and the other parts are wrapped or exported outward by the js implementation to meet the performance requirements (scripting languages such as js are developed faster than static languages such as C/C++, but their performance is weaker than that of the static languages), such as `buffer`, `crypto`, `fs`, `os` etc.
 
-- 一类是Node提供的模块，即__核心模块__
-- 另一类是用户编写的模块，即__文件模块__
+That is, there is a dependency layer relationship where a file module may depend on a core module (Js) and a core module may depend on a built-in module (C/C++). Here is the flow for introducing `os` native modules.
 
-## 2.1 核心模块
+! [P25](https://user-gold-cdn.xitu.io/2020/2/1/16fff891e1381541?w=864&amp;h=862&amp;f=png&amp;s=99119)
 
-核心模块在Node源代码的编译过程中，编译进了二进制执行文件。在Node进程启动时，部分核心模块就被直接加载进内存中，比普通的文件模块从磁盘中一处一处查找要快很多。所以核心模块引入时，文件定位和编译执行这两步骤可以省略掉，并且在路径分析中优先判断，所以加载速度是最快的
+## 2.3 Documentation module
 
-核心模块分成两部分：
+Dynamically loaded at runtime, including the complete path analysis, file location, compilation and execution of these processes described above, is slower than the core module.
 
-__1. 内建模块（C/C++编写的）__
+* Compile: the process of compiling the .js file as described above undergoes header and tail wrapping
+* Load: dynamically loaded at runtime
 
-在Node项目的[src](https://github.com/nodejs/node/tree/master/src)目录下，下面称为内建模块。性能上优于脚本语言。
+Written by the developer , including ordinary JS module and C/C++ extension module . The main calling direction is that ordinary JS modules call C/C++ extension modules.
 
-- 编译：预先被编译进二进制文件。`node_extensions.h`文件将这些散列的内建模块统一放进了一个叫`node_module_list`的数组中。
-- 加载：使用`get_builtin_module()`方法从`node_module_list`中取出，执行
+**C/C++ extension modules**
 
-__2. js核心模块（js编写的）__
+C/C++ extension module belongs to the category of file module. Mainly to improve performance, such as js only double type data type, and bit operation need to convert double type to int type, so js level to do bit operation efficiency is not high. This time you need to C / C + + extension module.
 
-在Node项目的[lib](https://github.com/nodejs/node/tree/master/lib)目录下。一类是作为C/C++内建模块的封装层和桥接层；一类是纯粹的功能模块，它不用跟底层打交道，但是又十分重要。
+* Compile: compiles to a .node file
+* Load: Load the files generated by the final compilation via the `process.dlopen()` method and then execute them.
 
-- 编译：Node采用V8附带的js2c.py，将所有js核心模块转换成C++的字符串数组（字符串即js核心模块文件内容），生成`node_natives.h`头文件。如上面所说编译.js文件的过程中经历了头尾包装，与2.2.2说的文件模块的区别在于：获取源代码的方式（核心模块从内存中加载）以及缓存执行结果的位置。
+## 2.4 Module call stack
 
-- 加载：通过`process.binding('natives')`取出上述的字符串数组放置在`nativeModule._source`。加载时直接从内存中加载，执行。 *[P25]*
+! [P33](https://user-gold-cdn.xitu.io/2020/2/1/16fff89c26dfe60d?w=1058&amp;h=562&amp;f=png&amp;s=59670)
 
-  ``` js
-  nativeModule._source = process.binding('natives')
-  ```
+Documentation modules include: JS modules and C/C++ extension modules; core modules include: js core modules and C/C++ built-in modules.
 
-## 2.2 核心模块的引入流程
+JS modules in file modules may call C/C++ extension modules, file modules may also call js core modules, js core modules may depend on C/C++ built-in modules. File modules may also call C/C++ built-in modules directly.
 
-在核心模块中，有些模块全部由C/C++编写；有些模块则由C/C++完成核心部分，其他部分由js实现包装或向外导出，以满足性能需求（脚本语言如js的开发速度优于静态语言如C/C++，但其性能弱于静态语言），如`buffer`、`crypto`、`fs`、`os`等。
+## 2.5 Third-party file modules (npm dependency packages)
 
-即存在一种依赖层关系，文件模块可能依赖核心模块（Js），核心模块可能依赖内建模块（C/C++）。下面是引入`os`原生模块的流程。
+It is basically the same as the normal file module, except for the difference in path analysis.
 
-![P25](https://user-gold-cdn.xitu.io/2020/2/1/16fff891e1381541?w=864&h=862&f=png&s=99119)
+# 3 Shared modules for front and back end
 
-## 2.3 文件模块
+* CommonJS specification: `Node.JS` follows the `CommonJS` specification. `module.exports = xxx` exports, `require()` introduces. Synchronized loading of modules.
+* AMD: Requirejs' canonicalized output for module definitions, asynchronous module definitions, module loading does not affect the operation of statements following it, dependency fronting. ``define`` definition, ``require`` introduction.
+    `` js
+    require(['clock'],function(clock){
+      clock.start();
+    });
+    ```
+* CMD: Seajs' normalized output for module definitions, synchronized module definitions, dependencies in close proximity. ``define`` definitions, ``require`` introductions.
+    `` * js
+    define(function(require, exports, module) {
+       var clock = require('clock');
+       clock.start();
+    });
+    ```
+* es6 specification: `export` exports, `import` imports.
 
-在运行时动态加载，包括了上述完整的路径分析、文件定位、编译执行这些过程，速度比核心模块慢。
+## 3.1 Compatible with multiple module specifications
 
-- 编译：如上面所说编译.js文件的过程中经历了头尾包装
-- 加载：在运行时动态加载
+In the current project, the general practice is:
 
-由开发者编写，包括普通JS模块和C/C++扩展模块。主要调用方向为普通JS模块调用C/C++扩展模块。
+babel converts es6 code to es5 (CommonJS specification). webpack does browser compatibility with CommonJS.
 
-__C/C++扩展模块__
+Referring to Nodejs, webpack mainly implements `exports` and `require` functions (`__webpack_require__`) and passes in `module`, `exports` and `__webpack_require__` parameters. See [webpack modularity principles-commonjs](https://segmentfault.com/a/1190000010349749) for details.
 
-C/C++扩展模块属于文件模块的一类。主要提升性能，如js只有double型的数据类型，而进行位运算需要把double型转为int型，所以js层面做位运算效率不高。这时就需要C/C++扩展模块。
+# Reference
 
-- 编译：编译成.node文件
-
-- 加载：通过`process.dlopen()`方法加载最后编译生成的文件然后执行。
-
-## 2.4 模块调用栈
-![P33](https://user-gold-cdn.xitu.io/2020/2/1/16fff89c26dfe60d?w=1058&h=562&f=png&s=59670)
-
-文件模块包括：JS模块和C/C++扩展模块；核心模块包括：js核心模块和C/C++内建模块。
-
-文件模块中JS模块可能调用C/C++扩展模块，文件模块同时也可能调用js核心模块，js核心模块可能依赖C/C++内建模块。文件模块同时也可能直接调用C/C++内建模块。
-
-## 2.5 第三方文件模块（npm依赖包）
-
-基本同普通文件模块，除了路径分析上的不同。
-
-# 3 前后端共用模块
-
-- CommonJS规范：`Node.JS`遵循`CommonJS`的规范。 `module.exports = xxx`导出， `require()`引入。同步加载模块。
-
-- AMD：Requirejs对模块定义的规范化产出，异步模块定义，模块的加载不影响它后面语句的运行，依赖前置。`define`定义，`require`引入。
-
-  ``` js
-  require(['clock'],function(clock){
-    clock.start();
-  });
-  ```
-
-- CMD：Seajs对模块定义的规范化产出，同步模块定义，依赖就近。`define`定义，`require`引入。
-
-  ``` js
-  define(function(require, exports, module) {
-     var clock = require('clock');
-     clock.start();
-  });
-  ```
-
-- es6规范：`export`导出，`import`引入
-
-## 3.1 兼容多种模块规范
-
-在目前的项目中，一般的做法是：
-
-babel将es6代码转成es5（CommonJS规范）。webpack做浏览器兼容CommonJS。
-
-参考Nodejs，webpack主要实现`exports`和`require`函数（`__webpack_require__`），并传入`module`、`exports`和`__webpack_require__`参数。详细可看[webpack模块化原理-commonjs](https://segmentfault.com/a/1190000010349749)
-
-
-
-# 参考
- - 《深入浅出nodejs》
- - [webpack模块化原理-commonjs](https://segmentfault.com/a/1190000010349749)
+* "In-depth nodejs.
+* [webpack modularity principles-commonjs](https://segmentfault.com/a/1190000010349749)

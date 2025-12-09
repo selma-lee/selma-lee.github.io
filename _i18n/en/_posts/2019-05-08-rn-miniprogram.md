@@ -1,148 +1,190 @@
 ---
 layout: post
-title: 了解React Native与小程序的底层框架
+title: Understanding React Native and the underlying framework of applets
 date: 2019-05-08 11:23:19
-tags: [hybrid app,小程序,React Native]
+tags: [hybrid app,WeChat Mini-Program,React Native]
 categories:
  - app
 ---
-本文是学习React Native与小程序官方开发指南的笔记与总结，以了解React Native和小程序的底层框架。
+
+This article is a collection of notes and summaries from studying the official development guide for React Native and applets to understand the underlying framework of React Native and applets.
+
 <!-- more -->
+
 # Hybrid App
-在了解React Native与小程序前，我们先来了解一下Hybrid App。
-## 优势
-Hybrid App（混合模式移动应用）是指介于web-app、native-app这两者之间的app，兼具“Native App良好用户交互体验的优势”和“Web App跨平台开发的优势”。
 
-> Native App是一种基于智能手机本地操作系统如iOS、Android、WP并使用原生程式编写运行的第三方应用程序，也叫本地app。一般使用的开发语言为JAVA、C++、Objective-C。
-> Web App就是运行于网络和标准浏览器上，基于网页技术开发实现特定功能的应用。
+Before we get into React Native and applets, let's take a look at Hybrid App.
 
-以下是与Web App和Native App的对比：
+## Strengths
 
-|  | Web App|Hybrid App|Native App|
-| ----- | ----- | ----- | -----  |
-|开发成本|	低	|中|高|
-|维护更新	|简单|简单|复杂|
-|体验	|差|优|优|
-|安装	| 不需要	|需要|需要|
-|跨平台|优|优|差|
+Hybrid App (mixed-mode mobile application) refers to the web-app, native-app between the two apps, both "Native App good user interaction experience advantages" and "Web App cross-platform development advantages "Native App is an app between web-app and native-app.
 
-## 技术原理
-Hybrid App的本质，其实是在原生的 App 中，使用 WebView 作为容器直接承载 Web页面，也有人说成是“套壳”。
-其中，最核心的点就是 Native端 与 H5端 之间的双向通讯层，也可以理解为我们需要一套跨语言通讯方案，来完成 Native(Java/Objective-c/...) 与 JavaScript 的通讯。这个方案就是 __JSBridge__，而实现的关键便是作为容器的 __WebView__，一切的原理都是基于 WebView 的机制。
-![Hybrid App](/assets/img/2019/07/hybrid-app-1.jpg)
+> Native App is a kind of third-party application based on the local operating system of smartphone such as iOS, Android, WP and written and run with native program, also called native app. generally the development language used is JAVA, C++, Objective-C.
+> A Web App is an application that runs on the web and a standard browser, and is developed based on web technology to realize specific functions.
 
- > WebView是一个基于webkit引擎、展现web页面的控件。
+Here is a comparison with Web App and Native App:
 
-## 现有方案
-现在比较流行的混合方案主要有三种，主要是在UI渲染机制上的不同：
- 1. 基于 WebView UI 的基础方案，市面上大部分主流 App 都有采用，例如微信JS-SDK，通过 JSBridge 完成 H5 与 Native 的双向通讯，从而赋予H5一定程度的原生能力。
- 2. 基于 Native UI 的方案，例如 React-Native、Weex。在赋予 H5 原生API能力的基础上，进一步通过 JSBridge 将js解析成的虚拟节点树(Virtual DOM)传递到 Native 并使用 __原生渲染__ 。
- 3. 另外还有近期比较流行的小程序方案，也是通过更加定制化的 JSBridge，并使用 __双线程__ 的模式隔离了JS逻辑与UI渲染，形成了特殊的开发模式，提高了页面性能及开发体验。
+| | Web App| Hybrid App| Native App|
+| ----- | ----- | ----- | ----- | ----- | -----
+|Development Costs | Low |Medium |High
+|Maintenance |Simple |Simple |Complicated |Experience |Poor |Simple |Complicated
+|Experience |Poor |Good |Excellent |Great
+|Installation |No |Required |Required |Required
+|Cross-platform |Good |Good |Bad |Cross-platform
 
-以上的三种方案，其实同样都是基于 JSBridge 完成的通讯层，第二三种方案，其实可以看做是在方案一的基础上，继续通过不同的新技术进一步提高了应用的混合程度。
+## Technical principles ##
 
-接下来，我们先看一下React Native的方案。
+The essence of Hybrid App is to use WebView as a container to carry Web pages directly in the native App, which is also called "shell".
+Among them, the core point is the two-way communication layer between the Native end and the H5 end, which can be understood as we need a set of cross-language communication solutions to complete the communication between Native (Java/Objective-c/...) and JavaScript. JavaScript. This solution is __JSBridge__, and the key to realize is as a container of __WebView__, all the principles are based on the WebView mechanism.
+! [Hybrid App](/assets/img/2019/07/hybrid-app-1.jpg)
 
-# React Native的底层框架
-## 总体框架
-![React Native](/assets/img/2019/07/react-native.jpeg)
- - js层
-该层提供了各种供开发者使用的组件以及一些工具库（事件分发等）。
- - C++层
-主要处理java/OC与js的通信（JSBridge）以及执行JavaScript（JS脚本引擎）。
- - Native层（Object C/Java层）
-主要包括UI渲染器、网络通信等工具库。根据不同操作系统有不同的实现。
+> WebView is a webkit engine based , web page display control .
 
-## UI渲染
-因为React Native的底层为React框架，同样地也体现了虚拟DOM的思想
- 1. 首先Js层通过jsx编写的Virtual Dom来构建Component
- 2. Native层将其转成真实DOM插入到原生 App 的页面中。
- 3. 当有变更，通过diff算法生成差异对象
- 4. 最终由 Native层将差异对象应用到原生App的页面元素上。
+## Existing programs
 
-> 虚拟DOM具体实现思路：
-> 1. 用JS对象模拟DOM（虚拟DOM）
-> 2. 把此虚拟DOM转成真实DOM并插入页面中（render）
-> 3. 如果有事件发生修改了虚拟DOM，比较两棵虚拟DOM树的差异，得到差异对象（补丁数组）（diff）
-> 4. 把差异对象（补丁数组）应用到真正的DOM树上（patch）
-> 优点是能高效的改动DOM，避免了重新绘制DOM。
+There are three main hybrid solutions that are more popular nowadays, mainly differing in their UI rendering mechanisms:
 
-## 通信机制
-主要是使用JSCore实现JS和Object C/Java交互。
-大致步骤如下：
- - 把JSX代码解析成javaScript代码
- - 读取JS文件，并利用利用JS脚本引擎执行
- - 返回一个数组，数组中会描述OC/Java对象，描述对象属性和所需要执行的方法，这样就能让这个对象设置属性，并且调用方法。
+1. WebView UI based on the basic program, most of the mainstream apps on the market have adopted, such as WeChat JS-SDK, through the JSBridge to complete the two-way communication between H5 and Native, so as to give H5 a certain degree of native capabilities. 2.
+2. based on Native UI programs, such as React-Native, Weex, on the basis of giving H5 native API capabilities, and further through the JSBridge will be resolved into a virtual node tree (Virtual DOM) passed to the Native and use **native rendering**. 3.
+3. In addition, there are more recent popular applet program, but also through a more customized JSBridge, and the use of ** dual-threaded ** mode isolates the JS logic and UI rendering, the formation of a special development model to improve page performance and development experience.
 
-> JSCore，即JavaScriptCore，JS引擎的核心部分。
-> iOS使用的是内置的JavaScriptCore，Android使用的是 https://webkit.org 家的jsc.so。
+The above three programs, in fact, the same are based on JSBridge to complete the communication layer, the second three programs, in fact, can be regarded as in the program on the basis of the first, continue to continue to further improve the degree of mixing of applications through different new technologies.
 
-## 小结
-RN既有Native的体验，又能使用前端开发者熟悉的React框架，并具有hybrid技术的优点，能跨平台开发，能远程更新代码，提高迭代频率和效率。
-但还有以下不足：
- - RN 所支持的样式是 CSS 的子集，会满足不了 Web 开发者日渐增长的需求；
- - RN 现有能力下还存在的一些不稳定问题，比如性能、Bug等。
- - RN 是把渲染工作全都交由客户端原生渲染，会有更接近原生的体验，但实际上一些简单的界面元素使用 Web 技术渲染完全能胜任。
+Next, let's take a look at the React Native scenario.
 
-接下来，我们来看一下小程序的双线程的模式。
+# The underlying framework for React Native
 
-# 小程序的底层框架
-## 双线程模型
-如下图，小程序的运行环境分成渲染层和逻辑层，WXML 模板和 WXSS 样式工作在渲染层，JS 脚本工作在逻辑层。小程序的渲染层和逻辑层分别由2个线程管理：渲染层的界面使用了WebView 进行渲染；逻辑层采用JsCore线程运行JS脚本。
-一个小程序存在多个界面，所以渲染层存在多个WebView线程。这使得小程序更贴近原生体验，也避免了单个WebView的任务过于繁重。
-这两个线程的通信会经由微信客户端（Native）做中转，逻辑层发送网络请求也经由Native转发。
-![小程序双线程模型](/assets/img/2019/07/miniprogram.png)
+## General framework
 
-## 原因
-小程序的渲染层和逻辑层分离主要有两个原因：
- 1. UI渲染跟 JavaScript 的脚本执行分别在两个线程，从而避免一些逻辑任务抢占UI渲染的资源。
- 2. 为了解决管控与安全问题，提供一个沙箱环境来运行开发者的JavaScript 代码（逻辑层），从而阻止开发者使用一些浏览器提供的，诸如跳转页面、操作DOM、动态执行脚本的开放性接口。详情可以看官网的[管控与安全](https://developers.weixin.qq.com/ebook?action=get_post_info&docid=0006a2289c8bb0bb0086ee8c056c0a)。
- 3. 渲染层和逻辑层的分离也给在不同的环境下（小程序与小程序开发者工具）运行提供了可能性。
+! [React Native](/assets/img/2019/07/react-native.jpeg)
 
-## UI渲染
-与RN一样，小程序在页面渲染上也体现了虚拟DOM的思想。
-![小程序页面渲染](/assets/img/2019/07/miniprogram-dom.png)
-1. 首先，在渲染层，宿主环境会把WXML可以先转成JS对象，然后再渲染出真正的Dom树。
-2. 在逻辑层发生数据变更的时候，我们需要通过宿主环境提供的setData方法把数据从逻辑层传递到渲染层，
-3. 再经过对比前后差异，把差异应用在原来的Dom树上，渲染出正确的UI界面。
+* :: js layer
 
-在组件系统方面，小程序的大部分组件由Exparser组件框架实现，小部分原生组件由客户端参与组件的渲染，以提供更好的性能。
-比如原生组件map``` <map latitude="39.92" longtitude="116.46"></map> ```
-在实际运行时，
- 1. 渲染层webview创建组件，插入到DOM树中后计算布局（位置与宽高）。
- 2. 通过通信机制通知Native，Native会根据布局插入一块原生区域并渲染。
- 3. 当webview得知位置或宽高发生变化时，通知Native做相应的调整。
+This layer provides various components for developers to use as well as some tool libraries (event distribution, etc.).
 
-详细看[原生组件](https://developers.weixin.qq.com/ebook?action=get_post_info&docid=000caab39b88b06b00863ab085b80a)。
+* :: C++ layer
 
-## 通信原理
-那么，渲染层与逻辑层是怎么与Native通信的呢？
-在视图层与客户端的交互通信（基本上只是原生组件会用到）方面，
- - iOS 利用WKWebView 的提供 messageHandlers 特性；
- - 安卓则是往 WebView 的 window 对象注入一个原生方法，最终会封装成 WeiXinJSBridge 这样一个兼容层。
+Mainly handles java/OC and js communication (JSBridge) and execution of JavaScript (JS script engine).
 
-在逻辑层与客户端原生通信机制方面，
- - iOS平台可以往JavaScripCore框架注入一个全局的原生方法；
- - 安卓方面则是跟渲染层一致的。
+* :: Native layer (Object C/Java layer)
 
-## 开发者工具
-上面有提到渲染层和逻辑层的分离也给在不同的环境下运行提供了可能性。在开发者工具中，逻辑层实际上是使用一个隐藏着的<webview/>标签来模拟JSCore的。并通过将JSCore中不支持的BOM对象局部变量化，使得开发者无法在小程序代码中正常使用BOM，从而避免不必要的错误。
-在通讯机制方面，开发者工具底层维护着一个WebSocket服务器，用于在WebView与开发者工具之间建立可靠的消息通讯链路，使得接口调用，事件通知，数据交换能够正常进行，从而使小程序模拟器成为一个统一的整体。
-详细可看官网上的[微信开发者工具](https://developers.weixin.qq.com/ebook?action=get_post_info&docid=0000a24f9d0ac86b00867f43a5700a)
+It mainly includes tool libraries such as UI renderer and network communication. There are different implementations according to different operating systems.
 
-## 小结
-小程序双线程模型中，渲染层和逻辑层分离，具有渲染快、加载快的优点；
-但任何数据传递都是线程间的通信，也就是都会有一定的延时。这会使得各部分的运行时序变得复杂一些。详细可以看官网上的[天生的延时](https://developers.weixin.qq.com/ebook?action=get_post_info&docid=0006a2289c8bb0bb0086ee8c056c0a)
+## UI rendering
 
-# 总结
-## 共同点
-RN与小程序都具有hybrid技术的优点，兼具“Native App良好用户交互体验的优势”和“Web App跨平台开发的优势”。
-从框架来说，都使用Web 相关技术来编写业务代码；都实现了一套跨语言通讯方案，来完成 Native(Java/Objective-c/...)端 与 JavaScript （小程序中分为渲染层和逻辑层）的通讯。
-## 不同点
-从渲染底层来看，小程序使用浏览器内核来渲染界面（小部分原生组件由客户端参与渲染），即界面主要由成熟的 Web 技术渲染，辅之以大量的接口提供丰富的客户端原生能力；而 RN 则是用客户端原生渲染的。
+Because React Native is underpinned by the React Framework, it also embodies the idea of a virtual DOM.
 
-# 参考
- - [Hybrid App技术解析 -- 原理篇](https://zhuanlan.zhihu.com/p/54019800)
- - [React Native for Android 原理分析与实践：实现原理](https://juejin.im/post/5a6460f8f265da3e4f0a446d)
- - [【React Native】从源码一步一步解析它的实现原理](https://www.jianshu.com/p/5cc61ec04b39)
- - [小程序开发者文档](https://developers.weixin.qq.com/ebook?action=get_post_info&docid=0004a2ef9b8f803b0086831c75140a)
+1. First the Js layer builds the Component through Virtual Dom written in jsx.
+2. Native layer will turn it into a real DOM and insert it into the page of the native app.
+3. When there is a change, generate diff object by diff algorithm. 4.
+4. Finally, the Native layer applies the diff object to the page elements of the native app.
+
+> Virtual DOM implementation ideas:
+>
+> 1. use JS object to simulate DOM (virtual DOM)
+> 2. turn this virtual DOM into real DOM and insert it into the page (render)
+> 3. if an event occurs that modifies the virtual DOM, compare the difference between the two virtual DOM trees, and get the difference object (patch array) (diff)
+> 4. apply the diff object (patch array) to the real DOM tree (patch)
+>
+> The advantage is that it is efficient to alter the DOM and avoids redrawing the DOM.
+
+## Communication mechanisms
+
+The main use of JSCore to achieve JS and Object C/Java interaction.
+The rough steps are as follows:
+
+* Parsing JSX code into javaScript code
+* Read JS files and use the utilization of JS script engine execution
+* Returns an array that describes the OC/Java object, describes the object properties and the methods that need to be executed, so that the object can be made to set properties and call methods.
+
+> JSCore, or JavaScriptCore, the core part of the JS engine.
+> iOS uses the built-in JavaScriptCore, Android uses jsc.so from the https://webkit.org family.
+
+## Summary
+
+RN has both the experience of Native, but also can use the front-end developers are familiar with the React framework, and has the advantages of hybrid technology, cross-platform development, can remotely update the code, to improve the iteration frequency and efficiency.
+But there are still the following shortcomings:
+
+* The styles supported by RN are a subset of CSS, which may not satisfy the growing needs of web developers;
+* RN's existing ability to exist under some unstable problems, such as performance, bugs, etc..
+* RN is to leave all the rendering work to the client-side native rendering, will have a closer to the native experience, but in fact some simple interface elements using Web technology rendering can be fully capable of.
+
+Next, let's look at the two-threaded mode of the applet.
+
+# Underlying framework for applets
+
+## Two-threaded model
+
+As shown in the figure below, the running environment of the applet is divided into a rendering layer and a logic layer, the WXML templates and WXSS styles work in the rendering layer, and the JS scripts work in the logic layer. The rendering layer and logic layer of the applet are managed by two threads: the rendering layer uses WebView for rendering the interface; the logic layer uses JsCore thread to run the JS scripts.
+There are multiple interfaces in an applet, so there are multiple WebView threads in the rendering layer. This makes the applet closer to the native experience and avoids overloading a single WebView.
+The communication between these two threads is relayed through the WeChat client (Native), and the logic layer sends network requests through Native.
+! [Small program dual-threaded model](/assets/img/2019/07/miniprogram.png)
+
+## Reason
+
+There are two main reasons for the separation of the rendering and logic layers of applets:
+
+1. UI rendering and JavaScript script execution in two separate threads, so as to avoid some logic tasks to preempt the resources of UI rendering.
+2. In order to solve the control and security problems, provide a sandbox environment to run the developer's JavaScript code (logic layer), so as to prevent the developer from using some browsers, such as jumping to the page, manipulating the DOM, dynamically executing scripts of the open interface. For more information, see [Control and Security](https://developers.weixin.qq.com/ebook?action=get_post_info&amp;docid=0006a2289c8bb0bb0086ee8c056c0a) on the official website.
+3. The separation of the rendering and logic layers also gives the possibility to run in different environments (applet vs. applet developer tools).
+
+## UI rendering
+
+Like RN, applets embody the idea of virtual DOM in page rendering.
+! [Applet page rendering](/assets/img/2019/07/miniprogram-dom.png)
+
+1. First of all, in the rendering layer, the host environment will convert the WXML can to JS object first, and then render the real Dom tree.
+2. When data changes occur in the logic layer, we need to pass the data from the logic layer to the rendering layer through the setData method provided by the host environment.
+3. and then after comparing the before and after differences, apply the differences to the original Dom tree and render the correct UI interface.
+
+In terms of the component system, most of the components of the applet are implemented by the Exparser component framework, and a small number of native components are involved in the rendering of the components by the client to provide better performance.
+For example, the native component map `<map latitude="39.92" longtitude="116.46"></map>`
+At actual runtime, the
+
+1. The rendering layer webview creates the component, inserts it into the DOM tree and calculates the layout (position and width). 2.
+2. Notify the Native through the communication mechanism, the Native will insert a native region according to the layout and render it. 3.
+3. When the webview learns that the position or aspect has changed, it notifies the Native to make adjustments accordingly.
+
+See [native components](https://developers.weixin.qq.com/ebook?action=get_post_info&amp;docid=000caab39b88b06b00863ab085b80a) for details.
+
+## Principles of communication ##
+
+So how do the rendering and logic layers communicate with the Native?
+In terms of the view layer's interactive communication with the client (which is basically only used by native components), the
+
+* iOS utilizes the messageHandlers feature provided by WKWebView;
+* Android injects a native method into the WebView's window object, which will eventually be encapsulated into a compatibility layer like WeiXinJSBridge.
+
+In terms of the logic layer's native communication mechanisms with the client, the
+
+* The iOS platform can inject a global native method into the JavaScripCore framework;
+* For Android it is consistent with the rendering layer.
+
+## Developer Tools
+
+As mentioned above the separation of the rendering and logic layers also gives the possibility to run in different environments. In the developer tools, the logical layer actually uses a hidden <webview/> tag to emulate JSCore. And by localizing the BOM objects that are not supported in JSCore, it makes it impossible for developers to use the BOM normally in the applet code, thus avoiding unnecessary errors.
+In terms of communication mechanism, the developer tool maintains a WebSocket server at the bottom of the developer tool , used in the WebView and the developer tool to establish a reliable message communication link between the interface call , event notification , data exchange can be carried out normally , so that the applet simulator becomes a unified whole.
+Details can see the official website of the [WeChat developer tools](https://developers.weixin.qq.com/ebook?action=get_post_info&amp;docid=0000a24f9d0ac86b00867f43a5700a)
+
+## Summary
+
+In the two-threaded model of the applet, the rendering layer is separated from the logic layer, which has the advantage of fast rendering and fast loading;
+However, any data transfer is inter-thread communication, which means there will be some delay. This can make the runtime sequencing of the various parts a bit more complicated. For details, see [Born with Latency](https://developers.weixin.qq.com/ebook?action=get_post_info&amp;docid=0006a2289c8bb0bb0086ee8c056c0a) on the official website.
+
+# Summarize
+
+## Common ground ##
+
+Both RN and applets have the advantages of hybrid technology, both "the advantages of good user interaction experience of Native App" and "the advantages of cross-platform development of Web App".
+In terms of framework, both use Web-related technologies to write business code; both implement a set of cross-language communication solutions to complete Native (Java/Objective-c/...) and JavaScript (which is divided into two parts in applets). end and JavaScript (small programs are divided into rendering layer and logic layer) communication.
+
+## Difference ##
+
+From the perspective of rendering the underlying layer, applets use the browser kernel to render the interface (a small number of native components are rendered by client-side participation), i.e., the interface is mainly rendered by mature Web technologies, supplemented by a large number of interfaces to provide rich client-side native capabilities; whereas RN is rendered with client-side native rendering.
+
+# Reference
+
+* [Hybrid App Technical Analysis -- Principles](https://zhuanlan.zhihu.com/p/54019800)
+* [React Native for Android principle analysis and practice: realization principle](https://juejin.im/post/5a6460f8f265da3e4f0a446d)
+* [[React Native] from the source code step by step analysis of its realization principle](https://www.jianshu.com/p/5cc61ec04b39)
+* [Small program developer documentation](https://developers.weixin.qq.com/ebook?action=get_post_info&amp;docid=0004a2ef9b8f803b0086831c75140a)

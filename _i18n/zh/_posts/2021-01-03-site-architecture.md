@@ -1,7 +1,7 @@
 ---
 title: 《大型网站技术架构》学习笔记
 date: 2021-01-03 11:26:02
-tags: [网站架构]
+tags: [Site Architecture]
 categories:
  - backend
 ---

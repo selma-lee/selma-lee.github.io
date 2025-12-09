@@ -2,7 +2,7 @@
 layout: post
 title: 《数据结构与算法JavaScript描述》算法部分学习心得
 date: 2018-07-18 22:49:20
-tags: [算法]
+tags: [Algorithm]
 categories: algorithm
 ---
 ## 导言

@@ -1,20 +1,25 @@
 ---
 layout: post
-title: 移动端重构遇到的坑（长期更新）
+title: The Pit of Mobile Refactoring (Long Term Update)
 date: 2016-11-04 00:47:34
-tags: 重构
+tags: Refactor
 categories:
  - UX
 ---
 
-这篇文章用来记录平时移动端重构遇到的坑，以备忘，长期更新。
+This article is used to record the usual mobile refactoring encountered pitfalls, to remember, long-term update.
+
 <!-- more -->
-## 键盘遮挡影响布局
-坑：ios下fixed属性失效。在编辑框输入内容时会弹出软键盘，而手机屏幕区域有限往往会遮住输入界面。
-如下面截图，图片来自[%幻#影% - 博客园](https://www.cnblogs.com/cmblogs/p/4448336.html)
-![键盘遮挡影响布局](/assets/img/2016/11/experience-1-2.jpg)
-fix：
- - 方法一：css 设置flex:1
+
+## Keyboard masking affects layout
+
+Pit: Fixed property fails under ios. When you type in the edit box, the soft keyboard will pop up, and the limited screen area of the phone will often cover the input interface.
+As the following screenshot, the image is from [%Phantom#Shadow% - Bloggernacle](https://www.cnblogs.com/cmblogs/p/4448336.html)
+! [Keyboard occlusion affects layout](/assets/img/2016/11/experience-1-2.jpg)
+fix:
+
+* :: Method 1: css set flex:1
+
 ``` css
 .container { /* 父类 */
     display: flex;
@@ -23,7 +28,9 @@ fix：
     flex: 1;
 }
 ```
- - 方法二：js 监听输入框focus事件，聚焦时上移页面，失焦时恢复原状
+
+* Method 2: js listen to the input box focus event, focus on the page to move up, out of focus to restore the original state
+
 ``` js
 $('input').on('focus', function() {
     $('.container-content').css('transform','translateY(-50%)');
@@ -33,9 +40,11 @@ $('.container-content').on('click', function() {
 })
 ```
 
-## 在微信等webview中无法修改document.title
-坑：会碰到需要动态修改document.title的需求，这时会遇到在微信等webview中无法修改document.title的坑
-fix：
+## Unable to modify document.title in wechat and other webviews
+
+Pit: will encounter the need to dynamically modify the needs of document.title, this will encounter in WeChat and other webviews can not modify the pit of document.title
+fix:
+
 ``` js
 // hack在微信等webview中无法修改document.title的情况
 var $iframe = $('<iframe src="#"></iframe>'),
@@ -46,6 +55,7 @@ $iframe.on('load',function() {
     }, 0);
 }).appendTo($body);
 ```
+
 ``` css
 iframe {
   visibility: hidden;
@@ -54,20 +64,25 @@ iframe {
 }
 ```
 
-## 图片边缘出现截断情况
-坑：在plus机上出现图片边缘截断情况。图标像素是奇数，前辈说移动端的图标都要求是偶数才不会出现问题。
-![图片边缘截断](/assets/img/2016/11/experience-1-1.jpeg)
-fix：编辑图像大小，改成偶数咯
-P.S.也有可能是用了rem的缘故。较小的背景图（比如一些 icon）的 background-size 不要使用具体 rem 数值，裁剪后会出现边缘丢失。应使用与元素等尺寸切图，设定 background-size: contain|cover 来缩放。
+## Picture edges appear truncated
 
-## 安卓机丢掉rem小数部分
-坑：IOS对小数的像素很敏感但是Android就不是，一些安卓机会丢掉rem小数部分
-fix：
- - 根元素设成50px，以50px为基准，即好算，而且小数位会少一点。
- - 残暴点的就不用rem，用px，再想其他的自适应方案。
+Pitfall: image edge truncation on plus machine. The icon pixels are odd, and my predecessor said that mobile icons are required to be even to not have problems.
+! [image edge truncation](/assets/img/2016/11/experience-1-1.jpeg)
+FIX: Edit the image size to an even number!
+P.S. It could also be due to the use of rem. Don't use a specific rem value for the background-size of smaller background images (like some icons), you'll lose the edges after cropping. You should use an element-size cutout and set background-size: contain|cover to scale it.
 
-## input[type="file"]的change事件只调用一次
-调用一次之后发现输入框没有绑定change事件，所以在回调函数内再绑定一次change事件。
+## Androids drop the rem decimal part ##
+
+Pit: IOS is sensitive to decimal pixels but Android is not, some androids will drop the rem decimal part
+fix:
+
+* The root element is set to 50px, to 50px, i.e. it's good math, and there will be less decimal places.
+* The more brutal ones don't use rem, use px, and think of other adaptive solutions.
+
+## The change event for input[type="file"] is called only once
+
+After calling it once, I realize that the input box is not bound to the change event, so I bind the change event again inside the callback function.
+
 ``` js
 $('input[type="file"]').on('change', function(e) {
   e.preventDefault();
@@ -84,5 +99,6 @@ $('input[type="file"]').on('change', function(e) {
 })
 ```
 
-## 参考
- - [用document.title=“xxx”动态修改title，在ios的微信下面不生效](https://segmentfault.com/q/1010000002926291)
+## Reference
+
+* [Dynamically change title with document.title="xxx", not effective under WeChat in ios](https://segmentfault.com/q/1010000002926291)

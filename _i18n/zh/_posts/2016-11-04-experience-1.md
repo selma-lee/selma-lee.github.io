@@ -2,7 +2,7 @@
 layout: post
 title: 移动端重构遇到的坑（长期更新）
 date: 2016-11-04 00:47:34
-tags: 重构
+tags: Refactor
 categories:
  - UX
 ---

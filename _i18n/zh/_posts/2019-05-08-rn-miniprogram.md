@@ -2,7 +2,7 @@
 layout: post
 title: 了解React Native与小程序的底层框架
 date: 2019-05-08 11:23:19
-tags: [hybrid app,小程序,React Native]
+tags: [hybrid app,WeChat Mini-Program,React Native]
 categories:
  - app
 ---

@@ -1,20 +1,26 @@
 ---
 layout: post
-title: 解决useEffect重复调用问题
+title: Solving the useEffect repeat call problem
 date: 2020-04-07 11:23:19
 tags: [React]
 categories:
  - web-framework
 ---
-`useEffect`是React hooks中可以让你在函数组件中执行副作用操作的[Effect Hook](https://zh-hans.reactjs.org/docs/hooks-effect.html)。
 
-在React hooks刚出来的时候我也记录过一篇关于[认识 react Hooks](https://seminelee.github.io/2019/03/04/react-hooks/)的。在使用的过程中，经常遇到`useEffect`重复调用的问题，因此借此文总结下。
+`useEffect` is the [Effect Hook](https://zh-hans.reactjs.org/docs/hooks-effect.html) of the React hooks that lets you perform side effect operations in function components.
+
+I also documented a piece on [recognizing react hooks](https://seminelee.github.io/2019/03/04/react-hooks/) when React hooks first came out. In the process of using them, I often encountered the problem of `useEffect` repeated calls, so I borrowed this article to summarize it.
+
 <!-- more -->
 
-# 1 为什么会出现重复请求的问题？
-总结一下原因可能会是：
-## 1.1 你没有设置effect依赖参数
-比如下面的例子，它在第一次渲染之后和每次更新之后都会执行。
+# 1 Why is there a problem with duplicate requests?
+
+To summarize the reasons could be:
+
+## 1.1 You didn't set the effect dependency parameter
+
+For example, in the example below, it executes after the first render and after each update.
+
 ``` js
 const [count, setCount] = useState(0)
 
@@ -22,12 +28,16 @@ useEffect(() => {
   document.title = `You clicked ${count} times`;
 })
 ```
-这是因为每次重新渲染，都有它自己的 Props and State。每一个组件内的函数（包括事件处理函数，effects，定时器或者API调用等等）会捕获某次渲染中定义的props和state。某种意义上讲，effect 更像是渲染结果的一部分 ——__每个 effect “属于”一次特定的渲染__。
 
-事实上这也正是我们可以在 effect 中获取最新的`count`的值，而不用担心其过期的原因。
-如果是没有设置effect依赖参数的原因，在`useEffect`的第二个参数设置好依赖项就可以了。
-## 1.2 你设置的依赖频繁变化
-有时候我们已经设置了依赖，但是发现还是会无限重复。有可能是你的依赖就是频繁变化的，即在改变状态的方法中用到了状态，比如：
+This is because each re-rendering has its own Props and State, and each function within the component (including event handlers, effects, timers or API calls, etc.) captures the Props and State defined in a particular rendering. in a sense, the effect is more like a part of the rendering result --__Each effect "belongs" to a particular rendering__.
+
+In fact this is exactly why we can get the latest value of `count` in effect without worrying about it expiring.
+If you don't have an effect dependency parameter set, just set the dependency in the second parameter of `useEffect`.
+
+## 1.2 The dependencies you set up change frequently
+
+Sometimes we have set up a dependency but find that it still repeats indefinitely. It's possible that your dependencies just change frequently, i.e. they use state in methods that change state, for example:
+
 ``` js
 function Counter() {
   const [count, setCount] = useState(0);
@@ -42,7 +52,9 @@ function Counter() {
   return <h1>{count}</h1>;
 }
 ```
-要解决这个问题，我们可以使用`setState`的[函数式更新](https://zh-hans.reactjs.org/docs/hooks-reference.html#functional-updates)形式。它允许我们指定 state 该 如何 改变而不用引用 当前 state：
+
+To solve this problem, we can use the [functional update](https://zh-hans.reactjs.org/docs/hooks-reference.html#functional-updates) form of `setState`. This allows us to specify how the state should change without referencing the current state:
+
 ``` js
 function Counter() {
   const [count, setCount] = useState(0);
@@ -57,11 +69,15 @@ function Counter() {
   return <h1>{count}</h1>;
 }
 ```
-详细可以看官网的[FAQ](https://zh-hans.reactjs.org/docs/hooks-faq.html#what-can-i-do-if-my-effect-dependencies-change-too-often)
-## 1.3 设置的依赖是引用数据类型
-其实这也属于第二个原因，如果我们设置的依赖是引用数据类型，我们会发现设置的依赖总是会改变。
 
-比如下面这个例子，打开控制台，会看到至少2次输出。上面也提到了，每次重新渲染，函数组件都有它自己的 Props and State。因此，React在对比时会得出该依赖每次都不相同。即使看起来内容相同，但是每次的引用地址都不一样，即`[] !== []`。
+For details, please see [FAQ](https://zh-hans.reactjs.org/docs/hooks-faq.html#what-can-i-do-if-my-effect-dependencies-change-too-often) on the official website.
+
+## 1.3 Dependencies set are referenced data types
+
+This actually falls under the second reason, if we set a dependency that references a data type, we'll find that the set dependency will always change.
+
+For example, if you open the console in the example below, you will see the output at least 2 times. As mentioned above, the function component has its own Props and State each time it is re-rendered, so React will conclude that the dependency is not the same each time when comparing. Even though it looks like the content is the same, the reference address is different each time, i.e. `[] ! == []`.
+
 ``` js
 const [data, setData] = useState([] as any)
 useEffect(() => {
@@ -77,14 +93,17 @@ useEffect(() => {
 }, [data])
 ```
 
-我们接下来要详细探讨的第三个原因的解决方法。
+The solution to the third reason, which we will explore in detail next.
 
-> __关于依赖项不要对React撒谎__
-> 如果你设置了依赖项，effect中用到的所有组件内的值都要包含在依赖中。这包括props，state，函数 — 组件内的任何东西。解决问题的方法不是移除依赖项。只有依赖项包含了所有effect中使用到的值，React才能知道何时需要运行它。
+> **Don't lie to React about the dependencies**
+> If you set up dependencies, all values within components used in effect should be included in the dependency. This includes props, states, functions - anything within a component. The solution to the problem is not to remove the dependency. Only if the dependency contains all the values used in the effect will React know when it needs to run it.
 
-# 2 函数作为依赖
-## 2.1 检查是不是必须把该函数作为依赖
-一般建议把不依赖props和state的函数提到你的组件外面，并且把那些仅被effect使用的函数放到effect里面。
+# 2 Functions as dependencies
+
+## 2.1 Check if the function must be used as a dependency
+
+It is generally recommended to mention functions that don't depend on props and state outside your component, and to put functions that are only used by effects inside effects.
+
 ``` js
 // ✅ Not affected by the data flow
 function getFetchUrl(query) {
@@ -99,10 +118,13 @@ function SearchResults() {
   // ...
 }
 ```
-## 2.2 useCallback
-如果发现你的effect的确需要用到组件内的函数（包括通过props传进来的函数），可以在定义它们的地方用[`useCallback`](https://zh-hans.reactjs.org/docs/hooks-reference.html#usecallback)包一层。为什么要这样做呢？因为这些函数可以访问到props和state，因此它们会参与到数据流中。
 
-`useCallback`本质上是添加了一层依赖检查。它以另一种方式解决了问题——我们使函数本身只在需要的时候才改变，而不是去掉对函数的依赖。
+## 2.2 useCallback
+
+If it turns out that your effect does need to use functions within the component (including functions passed in via props), you can wrap them where they are defined with [`useCallback`](https://zh-hans.reactjs.org/docs/hooks-reference.html# usecallback) to wrap a layer. Why? Because these functions have access to props and state, so they participate in the data flow.
+
+`useCallback` essentially adds a layer of dependency checking. It solves the problem in a different way - we make the function itself change only when needed, rather than removing dependencies on the function.
+
 ``` js
 function SearchResults() {
   const [query, setQuery] = useState('react');
@@ -120,24 +142,34 @@ function SearchResults() {
   // ...
 }
 ```
-如果是props传进来的函数，上面的例子中的`getFetchUrl`可以写成下面这样。props传进来的函数可以访问到props和state。把它的定义包裹进 useCallback Hook。这就确保了它不随渲染而改变，除非它自身的依赖发生了改变。
+
+In the case of a function passed in by props, `getFetchUrl` in the example above could be written as follows. the function passed in by props has access to both props and state. wrap its definition into the useCallback Hook. this ensures that it doesn't change with rendering unless its own dependencies have changed.
+
 ``` js
 const getFetchUrl = useCallback(props.fetchData, [query])
 ```
-[`useMemo`](https://zh-hans.reactjs.org/docs/hooks-reference.html#usememo)可以做类似的事情以避免非必要的渲染。`useCallback(fn, deps)` 相当于 `useMemo(() => fn, deps)`。这里就不再叙述了。
-# 3 对象作为依赖
-## 3.1 检查是不是必须把对象作为依赖
-首先可以检查下是不是必须把该对象作为依赖，比如：
- - 只需要用到该对象的某个非引用类型的属性；
- - 是JSON对象，可以通过`JSON.stringify()`转为字符串传递。子组件再将props传进来的JSON字符串用`JSON.parse()`解析。
+
+[``useMemo``](https://zh-hans.reactjs.org/docs/hooks-reference.html#usememo) can do something similar to avoid non-essential rendering. `useCallback(fn, deps)` is equivalent to `useMemo(() => fn, deps)`. I won't describe it here.
+
+# 3 Objects as dependencies
+
+## 3.1 Checking if an object must be used as a dependency
+
+The first thing you can check is whether you have to use that object as a dependency, for example:
+
+* Only a property of a non-reference type of this object is needed;
+* is a JSON object, which can be passed in as a string with `JSON.stringify()`. The subcomponent then parses the JSON string passed in by props with `JSON.parse()`.
+
 ## 3.2 useRef
-如果上面的方法都无法解决，希望`useRef`可以解决你的问题。
 
-到目前为止，我们知道，每一个组件内的函数（包括事件处理函数，effects，定时器或者API调用等等）会捕获某次渲染中定义的props和state。因此，解决问题的关键就在于，在effect的回调函数里读取最新的值而不是捕获的值，即从过去渲染中的函数里读取未来的props和state。指南中将此形象地比喻成[逆潮而动](https://overreacted.io/zh-hans/a-complete-guide-to-useeffect/#%E9%80%86%E6%BD%AE%E8%80%8C%E5%8A%A8)。
+If none of the above works, hopefully `useRef` will solve your problem.
 
-`useRef`就可以做到这一点。不同于effect捕获某次渲染中定义的props和state，`useRef`的`.current`属性就像一个保存一个可变值的“盒子”，可以获取最新的值。而且当 ref 对象内容发生变化时，`useRef`并不会通知你。变更`.current` 属性不会引发组件重新渲染。
+So far, we know that every function within a component (including event handlers, effects, timers or API calls, etc.) captures the props and states defined in a particular rendering, so the key to solving the problem lies in the fact that the most recent values are read in the effect's callback function instead of the captured ones, i.e., the future props and states are read from the function in the past rendering. The guide visualizes this as [moving against the tide](https://overreacted.io/zh-hans/a-complete-guide-to-useeffect/#%E9%80%86%E6%BD%AE%E8%80%8C%E5%8A%A8) The guide compares this to [moving against the tide] ().
 
-1.3中的例子可以改写成这样。打开控制台，可以看到只输出了最新的值`[]`。
+`useRef` does just that. Unlike effect, which captures the props and state defined in a particular rendering, `useRef`'s `.current` property acts as a `box' that holds a variable value, getting the most recent value. And `useRef` doesn't notify you when the contents of the ref object change. Changing the `.current` property does not trigger a re-rendering of the component.
+
+The example in 1.3 can be rewritten like this. Open the console and you can see that only the latest value `[]` is output.
+
 ``` js
 const [data, setData] = useState([] as any)
 const dataRef = useRef(data)
@@ -158,7 +190,7 @@ useEffect(() => {
 }, [])
 ```
 
-# 参考
- - [React官方文档](https://zh-hans.reactjs.org/docs/getting-started.html)
- - [useEffect 完整指南](https://overreacted.io/zh-hans/a-complete-guide-to-useeffect/)
- 
+# Reference
+
+* [Official React documentation](https://zh-hans.reactjs.org/docs/getting-started.html)
+* [useEffect Complete Guide](https://overreacted.io/zh-hans/a-complete-guide-to-useeffect/)

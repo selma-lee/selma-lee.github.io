@@ -1,44 +1,56 @@
 ---
 layout: post
-title: 理解浏览器与Nodejs中的event loop
+title: Understanding event loops in browsers and Nodejs
 date: 2019-01-26 20:18:03
 tags: [Koa, NodeJs]
 categories:
  - JavaScript
 ---
 
-# event loop是什么
-event loop即事件循环，是指浏览器或Node的一种解决javaScript单线程运行时不会阻塞的一种机制，也就是我们经常使用异步的原理。
+# What's an event loop
+
+event loop that is, the event loop, is a browser or Node to solve the javaScript single-threaded runtime will not block a mechanism , that is, we often use the principle of asynchronous .
+
 <!-- more -->
 
-# 浏览器中的事件循环
-## 主线程、执行栈、任务队列
-JavaScript 有一个 main thread __主线程__ 和 call-stack __执行栈__。所有的任务都会被放到执行栈等待主线程执行。
-__执行栈__ 也就是在其它编程语言中所说的“调用栈”，是一种拥有 LIFO（后进先出）数据结构的栈，被用来存储代码运行时创建的所有执行上下文。当 JavaScript 引擎第一次遇到你的脚本时，它会创建一个全局的执行上下文并且压入当前执行栈。每当引擎遇到一个函数调用，它会为该函数创建一个新的执行上下文并压入栈的顶部。引擎会执行那些执行上下文位于栈顶的函数。当该函数执行结束时，执行上下文从栈中弹出，控制流程到达当前栈中的下一个上下文。
-__任务队列__ Task Queue，即队列，是一种先进先出的一种数据结构。
-## 同步任务和异步任务
-JavaScript单线程任务被分为同步任务和异步任务。
-- 同步任务会在执行栈中按照顺序等待主线程依次执行
-- 异步任务会进入Event Table并注册函数。当指定的事情完成时，Event Table会将这个函数移入任务队列中。等待主线程空闲的时候（执行栈被清空），任务队列的任务按顺序被读取到栈内等待主线程的执行。
-如图：
-![同步任务和异步任务](/assets/img/2019/02/eventloop-1.png)
+# Event loop in the browser
 
-## 宏任务和微任务
-除了广义的同步任务和异步任务，我们对任务有更精细的定义。在高层次上，JavaScript中有宏任务（MacroTask）和微任务（MicroTask）。
-- MacroTask（宏任务）包括script全部代码、setTimeout、setInterval、I/O、UI Rendering等；
-- MicroTask（微任务）包括Process.nextTick（Node独有）、Promise、Object.observe(废弃)等。
+## Main thread, execution stack, task queue
 
-JS 引擎首先在宏任务队列中取出第一个任务`执行script`，执行完毕后取出微任务队列中的所有任务顺序执行；之后再取宏任务，如此循环，直至两个队列的任务都取完。
-如图：
-![宏任务和微任务](/assets/img/2019/02/eventloop-2.png)
+JavaScript has a main thread **main thread** and a call-stack **execution stack__. All tasks are placed on the call-stack and wait to be executed by the main thread.
+The __execution stack**, also known as the "call stack" in other programming languages, is a stack with a LIFO (last in first out) data structure that is used to store all the execution context that is created when the code is run. When the JavaScript engine first encounters your script, it creates a global execution context and presses it into the current execution stack. Whenever the engine encounters a function call, it creates a new execution context for that function and presses it to the top of the stack. The engine executes functions whose execution context is on the top of the stack. When the execution of the function finishes, the execution context is popped off the stack and the control flow reaches the next context on the current stack.
+**Task Queue** A task queue, or queue, is a first-in-first-out data structure.
 
-## 总的来说
- 1. 整体script作为第一个宏任务进入主线程。
- 2. 同步任务被放到执行栈，异步任务会进入Event Table并注册函数，其回调函数按类别被放到宏任务队列和微任务队列中。
- 3. 执行完所有同步任务后，开始读取任务队列中的结果。检查微任务队列，如果有任务则按顺序执行。
- 4. 执行完所有微任务后，开始下一个宏任务。如此循环，直到两个队列（宏任务队列和微任务队列）的任务都执行完。
+## Synchronous and asynchronous tasks
 
-## 例子
+JavaScript single-threaded tasks are classified as synchronous and asynchronous.
+
+* Synchronous tasks wait for the main thread to execute them sequentially in the Execution Stack.
+* Asynchronous tasks go into Event Table and register functions. When the specified thing completes, Event Table moves this function into the task queue. Waiting for the main thread to become idle (execution stack is emptied), tasks from the task queue are read into the stack in order waiting for the main thread to execute them.
+
+As pictured:
+! [Synchronous and asynchronous tasks](/assets/img/2019/02/eventloop-1.png)
+
+## Macro and microtasks
+
+In addition to the broad definition of synchronous and asynchronous tasks, we have a more fine-grained definition of tasks. At a high level, there are MacroTasks and MicroTasks in JavaScript.
+
+* MacroTask (MacroTask) including script all the code, setTimeout, setInterval, I/O, UI Rendering and so on;
+* MicroTask (micro task) including Process.nextTick (Node unique), Promise, Object.observe (deprecated) and so on.
+
+JS engine first in the macro task queue to take out the first task `execute script`, after the execution of the micro task queue to take out all the tasks in the order of execution; and then take the macro task, and so on until the two queues of tasks are taken out of the loop.
+As shown in the figure:
+! [Macro and micro tasks](/assets/img/2019/02/eventloop-2.png)
+
+## Overall ##
+
+1. The whole script enters the main thread as the first macro task. 2.
+2. Synchronous tasks are put on the execution stack, asynchronous tasks go to Event Table and register functions, and their callback functions are put into the macro task queue and micro task queue by category.
+3. After executing all synchronous tasks, start reading the results from the task queue. Check the microtask queue and execute the tasks in order if they are available.
+4. After executing all microtasks, start the next macro task. This cycle continues until the tasks in both queues (the macro task queue and the micro task queue) have been executed.
+
+## Example
+
 ``` js
 setTimeout(function() {
   console.log('宏事件3');
@@ -55,7 +67,9 @@ new Promise((resolve) => {
 
 console.log('宏事件2');
 ```
-执行结果：
+
+Implementation results:
+
 ``` bash
 宏事件1
 宏事件2
@@ -63,12 +77,15 @@ console.log('宏事件2');
 微事件2
 宏事件3
 ```
-具体过程是这样的：
- 1. `执行script`任务放到宏任务队列和执行栈中，主线程执行script，`setTimeout回调函数`放到宏任务队列中，打印`宏事件1`，`Promise then1` 放到微任务队列中，打印`宏事件2`，`执行script`任务完毕，执行栈清空。
- 2. 执行微任务队列的`Promise then1`，`Promise回调函数1`放到执行栈中，主线程执行`Promise回调函数1`，打印`微事件1`。回调函数返回`undefined`，此时又有then的链式调用，又放入微任务队列中，打印`微事件2`。检查微任务队列为空。
- 3. 宏任务队列的`执行script`任务完毕，`setTimeout回调函数`被放到执行栈中，主线程执行，打印`setTimeout`。执行栈清空，宏任务队列清空。
 
-## 例子2:加上async/await
+The exact process is this:
+
+1. `Execute script` task is put into macro task queue and execution stack, main thread executes script, `setTimeout callback function` is put into macro task queue, prints `macro event 1`, `Promise then1` is put into micro task queue, prints `macro event 2`, `Execute script` task is finished, execution stack is emptied.
+2. Execute `Promise then1` from the microtask queue, `Promise callback function 1` is put on the execution stack, the main thread executes `Promise callback function 1`, prints `microevent 1`. The callback function returns `undefined`, at which point there is another chained call to then, which is put into the microtask queue again, printing `Microevent2`. Check that the microtask queue is empty.
+3. The `execute script` task of the macro task queue is completed, the `setTimeout callback function` is placed on the execution stack, the main thread executes, and `setTimeout` is printed. The execution stack is empty and the macro task queue is empty.
+
+## Example 2: Adding async/await
+
 ``` js
 console.log('script start')
 
@@ -98,7 +115,9 @@ new Promise(resolve => {
 
 console.log('script end')
 ```
-首先，我们需要先理解`async/await`。`async/await`实际上是`promsie`的语法糖。如下：
+
+First, we need to understand `async/await` first. `async/await` is actually syntactic sugar for `promsie`. Below:
+
 ``` js
 // async await
 async function async1() {
@@ -106,7 +125,9 @@ async function async1() {
   console.log('async1 end')
 }
 ```
-可以理解成
+
+It can be understood as
+
 ``` js
 // chrome 73版本（新规范）
 function async1() {
@@ -121,10 +142,12 @@ function async1() {
   })
 }
 ```
- - 在新规范中，`RESOLVE(async2)` 对于`async2`为`promise`直接返回`async2`，那么`async2`的`then`方法就会被马上调用，其回调就立即进入任务队列。
- - 而`Promise.resolve(async2)`，尽管该`promise`确定会`resolve`为`async2`，但这个过程本身是异步的，也就是现在进入任务队列的是新 `promise` 的 `resolve`过程，所以该 `promise` 的 `then` 不会被立即调用，而要等到当前任务队列执行到前述 `resolve` 过程才会被调用，然后其回调（也就是继续 `await` 之后的语句）才加入任务队列，所以时序上就晚了。
 
-因此，在chrome 73版本中，打印的结果是：
+* In the new specification, `RESOLVE(async2)` returns `async2` directly for `async2` as a `promise`, then `async2`'s `then` method is called immediately, and its callback goes immediately to the task queue.
+* `Promise.resolve(async2)`, on the other hand, even though the `promise` is certain to `resolve` to `async2`, the process itself is asynchronous, i.e., it's the `resolve` process of the new `promise` that's now going into the task queue, and so the `then` method of the `promise` won't be called immediately, but will have to wait until the `then` method of the `async2` returns `async2`, and its callback goes into the task queue immediately. is not called immediately, but only when the current task queue executes into the aforementioned `resolve` procedure, and then its callback (which continues after the `await` statement) is added to the task queue, so the timing is late.
+
+So, in chrome version 73, the printout is:
+
 ``` bash
 script start
 async2 end
@@ -135,7 +158,9 @@ promise1
 promise2
 setTimeout
 ```
-在chrome 73版本以下，打印的结果是：
+
+Printing results in chrome version 73 and below:
+
 ``` bash
 script start
 async2 end
@@ -147,28 +172,39 @@ async1 end
 setTimeout
 ```
 
-# Nodejs中的event loop
-## 先了解一下Nodejs
-### Nodejs的特点
-Node.js 最大的特点就是使用 __异步式 I/O__ 与 __事件驱动__ 的架构设计。
-对于高并发的解决方案，传统的架构是多线程模型，而Node.js 使用的是 __单线程__ 模型，对于所有 I/O 都使用非阻塞的异步式的请求方式，避免了频繁的线程切换。__异步式I/O__ 是这样实现的：由于大多数现代内核都是多线程的，所以它们可以处理在后台执行的多个操作。Node.js 在执行的过程中会维护一个事件队列，程序在执行时进入 __事件循环__ 等待下一个事件到来。当事件到来时，事件循环将操作交给系统内核，当一个操作完成后内核会告诉Nodejs，对应的回调会被推送到事件队列，等待程序进程进行处理。
-### Nodejs的架构
-![nodejs架构](/assets/img/2019/02/nodejs-1.jpg)
-Node.js使用V8作为JavaScript引擎，使用高效的libev和libeio库支持事件驱动和异步式 I/O。Node.js的开发者在libev和libeio的基础上还抽象出了层libuv。对于POSIX1操作系统，libuv通过封装libev和libeio来利用 epoll 或 kqueue。在 Windows下，libuv 使用了 Windows的 IOCP机制，以在不同平台下实现同样的高性能。
-Event Loop就是在libuv中实现的。
- > epoll、kqueue、IOCP都是多路复用IO接口，即支持多个同时发生的异步I/O操作的应用程序编程接口。其中epoll为Linux独占，而kqueue则在许多UNIX系统上存在，包括Mac OS X。
-### Nodejs的运行机制
-![nodejs运行机制](/assets/img/2019/02/nodejs.png)
-Node.js的运行机制如下:
- - V8 引擎解析 JavaScript 脚本。
- - 解析后的代码，调用 Node API。
- - libuv 库负责 Node API 的执行。它将不同的任务分配给不同的线程，形成一个 Event Loop（事件循环），以异步的方式将任务的执行结果返回给 V8 引擎。
- - V8 引擎再将结果返回给用户。
- 
-## event loop的6个阶段
-当Node.js启动时，它初始化事件循环，处理提供的输入脚本，这些脚本可能进行异步API调用、调度计时器或调用process.nextTick()，然后开始处理事件循环。
+# event loop in Nodejs
+
+## Getting to know Nodejs first
+
+### Features of Nodejs
+
+Node.js is characterized by its use of **asynchronous I/O** and **event-driven** architecture.
+For highly concurrent solutions, the traditional architecture is a multi-threaded model, while Node.js uses a **single-threaded** model that uses non-blocking asynchronous requests for all I/O, avoiding frequent thread switches. **Asynchronous I/O** is implemented in such a way that since most modern kernels are multithreaded, they can handle multiple operations executing in the background. node.js maintains a queue of events as it executes, and the program enters an **event loop** while it executes and waits for the next event to arrive. When an event arrives, the event loop hands off the operation to the system kernel. When an operation is completed the kernel tells Nodejs and the corresponding callback is pushed to the event queue and waits for the program process to process it.
+
+### The architecture of Nodejs
+
+! [nodejs architecture](/assets/img/2019/02/nodejs-1.jpg)
+Node.js uses V8 as the JavaScript engine and supports event-driven and asynchronous I/O using the efficient libev and libeio libraries.The developers of Node.js have also abstracted the layer libuv on top of libev and libeio.For the POSIX1 operating system, libuv supports event-driven and asynchronous I/O by encapsulating the libev and libeio libraries to utilize epoll or kqueue. For POSIX1, libuv utilizes epoll or kqueue by encapsulating libev and libeio. libuv uses the Windows IOCP mechanism to achieve the same high performance across platforms.
+Event Loop is implemented in libuv.
+
+> epoll, kqueue, and IOCP are all multiplexed IO interfaces, i.e., application programming interfaces that support multiple simultaneous asynchronous I/O operations. Of these, epoll is exclusive to Linux, while kqueue exists on many UNIX systems, including Mac OS X.
+
+### The mechanics of running Nodejs
+
+! [nodejs runtime mechanism](/assets/img/2019/02/nodejs.png)
+The Node.js runtime mechanism is as follows.
+
+* The V8 engine parses JavaScript scripts.
+* The parsed code calls the Node API.
+* The libuv library is responsible for the execution of the Node API. It assigns different tasks to different threads, forming an Event Loop that returns the results of the tasks to the V8 engine in an asynchronous fashion.
+* The V8 engine then returns the results to the user.
+
+## 6 phases of an event loop
+
+When Node.js starts, it initializes the event loop, processes the supplied input scripts that may make asynchronous API calls, schedule timers, or call process.nextTick(), and then starts processing the event loop.
+
 ``` bash
-   ┌───────────────────────┐
+┌───────────────────────┐
 ┌─>│        timers         │
 │  └──────────┬────────────┘
 │  ┌──────────┴────────────┐
@@ -187,19 +223,22 @@ Node.js的运行机制如下:
 └──┤    close callbacks    │
    └───────────────────────┘
 ```
- - timers: 执行setTimeout和setInterval中到期的callback。
- - pending callback: 上一轮循环中少数的callback会放在这一阶段执行。
- - idle, prepare: 仅在内部使用。`process.nextTick()`在这一阶段执行。
- - poll: 最重要的阶段，执行pending callback，在适当的情况下会阻塞在这个阶段。
- - check: 执行setImmediate的callback。
- - close callbacks: 执行close事件的callback，例如socket.on('close'[,fn])或者http.server.on('close, fn)。
 
- > setImmediate()是将事件插入到事件队列尾部，主线程和事件队列的函数执行完成之后立即执行setImmediate指定的回调函数
+* timers: Execute callbacks that are due in setTimeout and setInterval.
+* pending callback: A few callbacks from the previous loop are placed in this stage.
+* idle, prepare: Used internally only. `process.nextTick()` is executed in this stage.
+* poll: the most important stage, executes the pending callback and will block in this stage if appropriate.
+* check: executes the setImmediate callback.
+* close callbacks: callbacks that execute close events, such as socket.on('close'[,fn]) or http.server.on('close, fn).
 
- event loop的每一次循环都需要依次经过上述的阶段。每个阶段都有自己的FIFO的callback队列（在timer阶段其实使用一个最小堆而不是队列来保存所有元素，比如timeout的callback是按照超时时间的顺序来调用的，并不是先进先出的队列逻辑），每当进入某个阶段，都会从所属的队列中取出callback来执行。当队列为空或者被执行callback的数量达到系统的最大数量时，进入下一阶段。这六个阶段都执行完毕称为一轮循环。
+> setImmediate() is to insert the event into the end of the event queue, and the callback function specified by setImmediate will be executed as soon as the main thread and the function of the event queue are finished.
+
+Each loop of the event loop goes through the above stages in turn. Each stage has its own FIFO callback queue (the timer stage actually uses a minimal heap rather than a queue to hold all the elements, e.g., the callbacks for the timeout are called in the order of their timeout times, not a FIFO queue logic), and whenever it enters a certain stage, it will take the callbacks out of the queue it belongs to When the queue is empty or a callback has been executed, the callback will be called from the queue. When the queue is empty or the number of callbacks executed reaches the system's maximum number, the next stage. These six phases are called a round-robin.
 
 ### timers
-在timers阶段，会执行setTimeout和setInterval中到期的callback。执行这两者回调需要设置一个毫秒数，理论上来说，应该是时间一到就立即执行callback回调，但是由于system的调度可能会延时，达不到预期时间。如下例：
+
+In the timers phase, the callbacks due in setTimeout and setInterval will be executed, which need to be set to a milliseconds number, theoretically, the callback callbacks should be executed as soon as the time arrives, but due to the system's scheduling may be delayed, and the expected time cannot be reached. The following is an example:
+
 ``` js
 const fs = require('fs');
 
@@ -216,7 +255,6 @@ setTimeout(() => {
   console.log(`${delay}ms have passed since I was scheduled`);
 }, 100);
 
-
 // do someAsyncOperation which takes 95 ms to complete
 someAsyncOperation(() => {
   const startCallback = Date.now();
@@ -227,31 +265,40 @@ someAsyncOperation(() => {
   }
 });
 ```
-当进入事件循环时，它有一个空队列（`fs.readFile()`尚未完成），因此定时器将等待剩余毫秒数，当到达95ms（假设`fs.readFile()`需要95ms）时，`fs.readFile()`完成读取文件并且其完成需要10毫秒的回调被添加到轮询队列并执行。因此，原本设置100ms后执行的回调函数，会在约105ms后执行。
-P.S. timers的源码[node/deps/uv/src/timer.c](https://github.com/nodejs/node/blob/master/deps/uv/src/timer.c)的uv__run_timers函数。
+
+When entering the event loop, it has an empty queue (`fs.readFile()` has not completed yet), so the timer waits for the number of milliseconds remaining, and when it reaches 95ms (assuming that `fs.readFile()` takes 95ms), `fs.readFile()` completes reading the file and the callback whose completion takes 10 milliseconds is added to the polling queue and executed. Therefore, a callback function that was set to execute after 100ms will execute after about 105ms.
+P.S. The uv__run_timers function in the timers source code [node/deps/uv/src/timer.c](https://github.com/nodejs/node/blob/master/deps/uv/src/timer.c).
 
 ### pending callbacks
-此阶段执行某些系统操作（例如TCP错误类型）的回调。 例如，如果TCP socket ECONNREFUSED在尝试connect时receives，则某些* nix系统希望等待报告错误。 这将在pending callbacks阶段执行。
 
-### poll（轮询）
-执行pending callback，在适当的情况下会阻塞在这个阶段。
-poll阶段有两个主要功能：
- - 执行I/O（连接、数据进入/输出）回调。
- - 处理轮询队列中的事件。
+This phase performs callbacks for certain system operations (such as TCP error types). For example, if TCP socket ECONNREFUSED receives when connect is attempted, some * nix systems want to wait to report the error. This is performed in the PENDING CALLBACKS phase.
 
-当事件循环进入poll阶段并且在timers中没有可以执行定时器时，
- - 如果poll队列不为空，则事件循环将遍历其同步执行它们的callback队列，直到队列为空，或者达到system-dependent（系统相关限制）。
- - 如果poll队列为空，会检查是否有setImmediate()回调需要执行，如果有则马上进入执行check阶段以执行回调。
+### poll (polling)
 
-如果timers中有可以执行定时器且 poll 队列为空时，则会判断是否有 timer 超时，如果有的话会回到 timer 阶段执行回调。
+Performs a pending callback, blocking in this phase where appropriate.
+The poll phase has two main functions:
+
+* Performs I/O (connection, data in/out) callbacks.
+* Handles events in the polling queue.
+
+When the event loop enters the poll phase and there are no timers in the timers that can be executed, the
+
+* If the poll queue is not empty, the event loop traverses its queue of callbacks synchronizing their execution until the queue is empty, or the system-dependent limit is reached.
+* If the poll queue is empty, it checks to see if there is a setImmediate() callback to be executed, and if there is, it immediately enters the execution check phase to execute the callback.
+
+If there are timers that can be executed and the poll queue is empty, it will determine if any timer has timed out, and if so, it will go back to the timer phase and execute the callback.
 
 ### check
-此阶段执行`setImmediate`的callback。`setImmediate()`实际上是一个特殊的计时器，它在事件循环的一个单独阶段运行。它使用一个libuv API，该API在poll阶段完成后执行callback。
- > `setImmediate()`和`setTimeout()`是相似的，但根据它们被调用的时间以不同的方式表现。
- > - `setImmediate()`设计用于在当前poll阶段完成后check阶段执行脚本 。
- > - `setTimeout()` 安排在经过最小（ms）后运行的脚本，在timers阶段执行
 
-举个例子：
+This stage executes the callback for `setImmediate`. `setImmediate()` is actually a special timer that runs in a separate stage of the event loop. It uses a libuv API which executes the callback after the poll phase is complete.
+
+> `setImmediate()` and `setTimeout()` are similar, but behave in different ways depending on when they are called.
+>
+> * `setImmediate()` is designed to execute scripts in the check phase after the current poll phase has completed .
+> * `setTimeout()` schedules scripts to run after a minimum (ms) elapsed time, during the timers phase.
+
+An example:
+
 ``` js
 const fs = require('fs');
 
@@ -264,24 +311,31 @@ fs.readFile(__filename, () => {
   });
 })
 ```
-其结果是
+
+The result is
+
 ``` bash
 immediate
 timeout
 ```
-主要原因是在I/O阶段读取文件后，事件循环会先进入poll阶段，发现有`setImmediate`需要执行，会立即进入check阶段执行`setImmediate`的回调。然后再进入timers阶段，执行`setTimeout`，打印timeout。
+
+The main reason for this is that after reading the file in the I/O stage, the event loop will first go to the poll stage, and when it finds that there is a `setImmediate` that needs to be executed, it will immediately go to the check stage to execute the `setImmediate` callback. Then it will enter the timers stage and execute `setTimeout` to print the timeout.
 
 ### close callbacks
-如果套接字或句柄突然关闭(例如`socket.destroy()`)，那么'close'事件将在这个阶段发出。否则，它将通过`process.nextTick()`发出。
- > `process.nextTick()`方法将 callback 添加到next tick队列。 一旦当前事件轮询队列的任务全部完成，在next tick队列中的所有callbacks会被依次调用。即，当每个阶段完成后，如果存在 nextTick 队列，就会清空队列中的所有回调函数，并且优先于其他 microtask 执行。
 
-# Nodejs与浏览器的Event Loop差异
- - Node 端，microtask 在事件循环的各个阶段之间执行
- - 浏览器端，microtask 在事件循环的 macrotask 执行完之后执行
+If the socket or handle is suddenly closed (e.g. `socket.destroy()`), then the 'close' event will be emitted at this stage. Otherwise, it will be emitted via `process.nextTick()`.
 
-![Nodejs与浏览器的Event Loop差异](/assets/img/2019/02/eventloop-3.png)
+> The `process.nextTick()` method adds a callback to the next tick queue. Once all the tasks in the current event polling queue have been completed, all callbacks in the next tick queue are called in turn. That is, when each phase is complete, the nextTick queue, if it exists, is emptied of all callback functions in the queue and is executed in preference to other microtasks.
 
-举个例子：
+# Event Loop Differences between Nodejs and Browsers
+
+* On the Node side, the microtask is executed between stages of the event loop.
+* On the browser side, the microtask is executed after the macrotask of the event loop has been executed
+
+! [Event Loop differences between Nodejs and browsers](/assets/img/2019/02/eventloop-3.png)
+
+An example:
+
 ``` js
 setTimeout(()=>{
     console.log('timer1')
@@ -296,8 +350,10 @@ setTimeout(()=>{
     })
 }, 0)
 ```
-浏览器端运行结果：
-![浏览器端运行结果：](/assets/img/2019/02/eventloop-browser.gif)
+
+Browser-side results:
+! [Browser-side running result:](/assets/img/2019/02/eventloop-browser.gif)
+
 ``` bash
 timer1
 promise1
@@ -305,33 +361,38 @@ timer2
 promise2
 ```
 
-node端（v10.15.1)运行结果
-![node端运行结果：](/assets/img/2019/02/eventloop-node.gif)
+The node side (v10.15.1) runs the result
+! [node-side run results:] (/assets/img/2019/02/eventloop-node.gif)
+
 ``` bash
 timer1
 timer2
 promise1
 promise2
 ```
- 1. 全局脚本（main()）执行，将 2 个 timer 依次放入 timer 队列，main()执行完毕，调用栈空闲，任务队列开始执行；
- 2. 首先进入 timers 阶段，执行 timer1 的回调函数，打印 timer1，并将 promise1.then 回调放入 microtask 队列，同样的步骤执行 timer2，打印 timer2；
- 3. 至此，timer 阶段执行结束，event loop 进入下一个阶段之前，执行 microtask 队列的所有任务，依次打印 promise1、promise2
 
-在node新版本（v11）中，执行结果变成与浏览器一致：
+1. The global script (main()) is executed, and the two timers are put into the timer queue one after another. After main() is executed, the call stack is free, and the task queue is started. 2;
+2. first enter the timers phase, execute the callback function of timer1, print timer1, and put the promise1.then callback into the microtask queue, the same steps to execute timer2, print timer2. 3. so the timer stage, the timer1.then callback into the microtask queue, the timer1.then callback into the microtask queue;
+3. At this point, the timer phase is finished, and before the event loop enters the next phase, all tasks in the microtask queue are executed, printing promise1 and promise2 in turn.
+
+In the new version of node (v11), the execution results become consistent with the browser:
+
 ``` bash
 timer1
 promise1
 timer2
 promise2
 ```
-详情看[又被node的eventloop坑了，这次是node的锅](https://juejin.im/post/5c3e8d90f265da614274218a)
 
-# 参考
- - [Tasks, microtasks, queues and schedules](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/)
- - [更快的异步函数和 Promise](https://v8.js.cn/blog/fast-async/)
- - 《Node.js开发指南》
- - [The Node.js Event Loop, Timers, and process.nextTick()](https://nodejs.org/en/docs/guides/event-loop-timers-and-nexttick/)
- - [一次弄懂Event Loop](https://mp.weixin.qq.com/s/KEl_IxMrJzI8wxbkKti5vg)
- - [不要混淆nodejs和浏览器中的event loop](https://cnodejs.org/topic/5a9108d78d6e16e56bb80882)
- - [浏览器与Node的事件循环(Event Loop)有何区别?](https://www.cnblogs.com/fundebug/p/diffrences-of-browser-and-node-in-event-loop.html)
- - [又被node的eventloop坑了，这次是node的锅](https://juejin.im/post/5c3e8d90f265da614274218a)
+For details, see [pwned by node's eventloop again, this time it's node's pot](https://juejin.im/post/5c3e8d90f265da614274218a)
+
+# Reference
+
+* [Tasks, microtasks, queues and schedules](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/)
+* [Faster Asynchronous Functions and Promise](https://v8.js.cn/blog/fast-async/)
+* The Node.js Developer's Guide.
+* [The Node.js Event Loop, Timers, and process.nextTick()](https://nodejs.org/en/docs/guides/event-loop-timers-and-nexttick/)
+* [Figuring out Event Loop once and for all](https://mp.weixin.qq.com/s/KEl_IxMrJzI8wxbkKti5vg)
+* [Don't confuse event loops in nodejs and browsers](https://cnodejs.org/topic/5a9108d78d6e16e56bb80882)
+* [What's the difference between Event Loop in browser and Node?"] (https://www.cnblogs.com/fundebug/p/diffrences-of-browser-and-node-in-event-loop.html)
+* [Pitted by node's eventloop again, this time it's node's pot](https://juejin.im/post/5c3e8d90f265da614274218a)

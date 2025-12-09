@@ -2,7 +2,7 @@
 layout: post
 title: 虚拟DOM的简单实现
 date: 2019-09-09 18:29:10
-tags: [React, 虚拟DOM]
+tags: [React, Virtual DOM]
 categories:
  - web-framework
 ---

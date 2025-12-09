@@ -1,50 +1,65 @@
 ---
-title: 《大型网站技术架构》学习笔记
+title: Technical Architecture for Large Scale Websites Study Notes
 date: 2021-01-03 11:26:02
-tags: [网站架构]
+tags: [Site Architecture]
 categories:
  - backend
 ---
 
-# 1 架构模式概述
-## 1.1 分层
-大型网站架构中，采用分层架构，将网站软件系统在横向方面切分，分为应用层、服务层、数据层。这对之后网站支持高并发，向分布式方向发展至关重要。
- - 应用层：具体业务和视图展示。（前端）
- - 服务层：为应用层提供服务支持。（后端）
- - 数据层：提供数据存储访问服务。
+# 1 Overview of Architecture Patterns
+
+## 1.1 Layering
+
+In large-scale website architecture, a layered architecture is used to slice the website software system in the horizontal aspect into application layer, service layer, and data layer. This is crucial for the website to support high concurrency and develop in the distributed direction afterwards.
+
+* :: Application layer: specific operations and view presentation. (Front-end)
+* Service layer: service support for the application layer. (back-end)
+* Data layer: provide data storage access services.
+
 <!-- more -->
 
-## 1.2 分割
-分割，就是将网站软件系统在纵向方面切分。比如在应用层，将不同业务进行分割；在服务层将服务分割成合适的模块。
+## 1.2 Segmentation
 
-## 1.3 分布式
-分层和分割的一个主要目的是，为了切分后的模块便于分布式部署，即将不同模块部署在不同的服务器上，通过远程调用协同工作。常见的分布式方案有：
- - 分布式应用和服务。改善网站性能、加快开发、使不同应用复用共同的服务。
- - 分布式静态资源。静态资源独立分布式部署，使用独立的域名，即动静分离。
- - 分布式数据和存储。关系数据库分布式部署，NoSQL分布式数据库。
- - 分布式计算。Hadoop和MapReduce分布式计算框架批处理计算.
+Segmentation, that is, slicing and dicing the website software system in the vertical aspect. For example, at the application layer, different services are segmented; at the service layer, services are segmented into appropriate modules.
 
-这也对网站的开发维护有更高的要求。
+## 1.3 Distributed
 
-## 1.4 集群
-使用分布式后，对于用户访问集中的模块，还需要将独立部署的服务器集群化，即多台服务器部署相同的应用构成一个集群，通过负载均衡设备共同对外提供服务，也可提高系统的可用性。
+One of the main purposes of layering and segmentation is to facilitate distributed deployment of the sliced modules, i.e., different modules are deployed on different servers and work together through remote calls. The common distributed schemes are:
 
-## 1.5 缓存
-用于改善软件性能。包括：
- - CDN：内容分发网络，缓存一些静态资源（如视频网站中访问量大的热点视频），从距离用户最近的网络服务商返回给用户。
- - 反向代理：缓存网站的静态资源，实现负载均衡。
- - 本地缓存：在应用服务器本地缓存热点数据，应用程序直接访问，无需访问数据库。
- - 分布式缓存：缓存数据需要内存空间增大，这时候就需要分布式缓存，应用程序通过网络通信访问缓存数据。
+* :: Distributed applications and services. Improves site performance, speeds development, and enables reuse of common services across applications.
+* Distributed static resources. Static resources are independently distributed deployment, using a separate domain name, that is, separation of dynamic and static.
+* Distributed data and storage. Distributed deployment of relational databases, NoSQL distributed databases.
+* Distributed computing. Hadoop and MapReduce distributed computing framework batch computing.
 
-## 1.6 异步
-大型网站架构中，系统解耦的手段除了分层、分割、分布等，还有异步。在单一服务器内部可通过多线程共享内存队列的方式实现异步；在分布式系统中，多个服务器集群通过分布式消息队列实现异步。异步架构是典型的生产者消费者模式。
-使用异步消息队列，可提高系统可用性，加快网站响应速度，消除并发访问高峰
-。
-## 1.7 冗余
-为了某台服务器故障时网站依然可以继续服务，需要一定程度的服务器冗余运行（至少两台），数据冗余备份（定期备份冷备份、主从分离热备份）。
+This also places a higher demand on the development and maintenance of the website.
 
-## 1.8 自动化
-通过减少人为干预，减少故障。包括：发布过程自动化、自动化代码管理、自动化测试、自动化安全检测、自动化部署、自动化监控、自动化告警、自动化失效转移、自动化失效恢复、自动化降级、自动化分配资源。
+## 1.4 Clustering
 
-## 1.9 安全
-通过密码和手机校验码进行身份认证；敏感操作的网络通信需要加密；防止ddos，使用验证码识别；防止XSS攻击、SQL注入，进行转义等处理；过滤垃圾信息等等。
+After the use of distributed, for the user to access the centralized module, but also need to independently deployed server clustering, that is, multiple servers deploying the same application constitute a cluster, through the load balancing equipment to provide services to the outside world, but also to improve the availability of the system.
+
+## 1.5 Caching
+
+Used to improve software performance. Included:
+
+* :: CDN: Content Delivery Network, which caches some static resources (e.g., hot videos with high access in video websites) and returns them to users from the nearest network service provider.
+* Reverse proxy: caches static resources of a website to achieve load balancing.
+* Local Cache: caches hot data locally in the application server, which is directly accessed by the application program without accessing the database.
+* Distributed Cache: Cached data requires an increase in memory space, which requires distributed caching, where the application accesses the cached data through network communication.
+
+## 1.6 Asynchronous
+
+In large-scale website architecture, the means of system decoupling, in addition to layering, partitioning, distribution, etc., there is also asynchrony. Asynchrony can be realized within a single server by means of multi-threaded shared memory queues; in distributed systems, multiple server clusters realize asynchrony through distributed message queues. Asynchronous architectures are typically producer-consumer patterns.
+Using asynchronous message queues improves system availability, speeds up website response, and eliminates concurrent access spikes
+Asynchronous message queuing is a typical producer-consumer pattern.
+
+## 1.7 Redundancy
+
+In order for the website to continue to be served in the event of a server failure, a certain degree of server redundancy is required (at least two), and data redundancy backups (regular backups cold backups, master-slave separation hot backups).
+
+## 1.8 Automation
+
+Reduce failures by reducing human intervention. Includes: release process automation, automated code management, automated testing, automated security testing, automated deployment, automated monitoring, automated alerting, automated failover, automated failback, automated degradation, automated resource allocation.
+
+## 1.9 Security
+
+Authentication by password and cell phone check code; network communication for sensitive operations needs to be encrypted; prevent ddos, use captcha identification; prevent XSS attacks, SQL injection, escape and other processing; filter spam and so on.

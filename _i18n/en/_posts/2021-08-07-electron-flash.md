@@ -1,30 +1,37 @@
 ---
-title: 用electron实现播放flash小游戏
+title: Play flash games with electron
 date: 2021-08-07 13:27:13
 tags: [electron,flash]
 categories:
  - app
 ---
-# 0 背景
-从小学开始，我就很喜欢玩4399上的[宠物连连看flash小游戏](https://www.4399.com/flash/17801_4.htm)。
 
-然而，因为flash的安全性等问题，很多浏览器都不再支持flash。比如chrome，自 2021 年起，[在任何版本的 Chrome 中，Flash 内容（包括音频和视频）都将无法再正常播放](https://www.blog.google/products/chrome/saying-goodbye-flash-chrome/)，并且从v88起完全移除Flash插件的相关代码。
+# 0 Background
+
+Since elementary school, I've enjoyed playing [pet connecting flash game](https://www.4399.com/flash/17801_4.htm) on 4399.
+
+However, because of flash's security and other issues, many browsers no longer support flash. chrome, for example, [Flash content (including audio and video) will no longer play properly in any version of Chrome starting in 2021](https://www.blog.google/products/ chrome/saying-goodbye-flash- chrome/), and the code related to the Flash plugin has been completely removed since v88.
+
 <!-- more -->
-![不能玩了](/assets/img/2021/08/game.png)
 
+! [Can't play anymore](/assets/img/2021/08/game.png)
 
-# 1 解决方案
-因此，我想到了，利用 Electron ，指定一个低于v88的版本的chromium，使用 Pepper Flash 插件加载钟爱的flash小游戏，以供随时娱乐^ ^。
+# 1 Solution
 
-## 1.1 electron原理
-[Electron](https://www.electronjs.org/docs)是一个使用 JavaScript、HTML 和 CSS 构建桌面应用程序的框架。它嵌入了 Chromium 和 Node.js，允许您使用 JavaScript、HTML 和 CSS  代码创建 在Windows、 macOS和Linux上运行的跨平台应用。
+So it occurred to me, using Electron, to specify a version of chromium lower than v88, and use the Pepper Flash plugin to load beloved flash mini-games for anytime entertainment ^ ^.
 
-按我的理解，就是利用Node.js创建一个服务，把开发者写好的网页部署到Node.js服务中，并在Chromium浏览器中打开这个网址。
+## 1.1 electron principle
 
-## 1.2 主要代码
-版本：项目中的`electron`版本为`^11.4.7`，chromium版本为`87.0.4280.141`。
+[Electron](https://www.electronjs.org/docs) is a framework for building desktop applications using JavaScript, HTML and CSS. It embeds Chromium and Node.js and allows you to use JavaScript, HTML and CSS code to create cross-platform applications that run on Windows, macOS and Linux. and Node.js and allows you to use JavaScript, HTML and CSS code to create cross-platform applications that run on Windows, macOS and Linux.
 
-在`index.html`，就只放一个宠物连连看flash小游戏。
+As I understand it, it's about creating a service using Node.js, deploying a web page written by a developer to the Node.js service, and opening the URL in the Chromium browser.
+
+## 1.2 Main code
+
+Versions: the `electron` version of the project is `^11.4.7` and the chromium version is `87.0.4280.141`.
+
+In `index.html`, just put a pet flash game.
+
 ``` html
 <!DOCTYPE html>
 <html>
@@ -41,9 +48,10 @@ categories:
   </body>
 </html>
 ```
-在`window.js`中，实现创建窗口方法，打开`index.html`。
+
+In `window.js`, implement the create window method and open `index.html`.
+
 ``` js
-  
 const { BrowserWindow } = require('electron');
 const path = require('path');
 
@@ -66,7 +74,9 @@ function createWindow () {
 
 module.exports = createWindow;
 ```
-在`plugins.js`中，根据不同的操作系统引入不同的Pepper Flash 插件。
+
+In `plugins.js`, different Pepper Flash plugins are introduced depending on the operating system.
+
 ``` js
 const getFlashPlugin = () => {
   if (process.platform === "win32") {
@@ -97,7 +107,9 @@ module.exports = {
   getFlashPlugin
 };
 ```
-在`main.js`中引入`plugins.js`和`window.js`并调用。
+
+Introduce `plugins.js` and `window.js` in `main.js` and call them.
+
 ``` js
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
@@ -132,15 +144,19 @@ app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
 });
 ```
-详细代码可看下面的源码。
 
-# 2 源码
-github仓库：https://github.com/seminelee/electron-flash-linklink
-只需运行简单的命令，你就能得到一个桌面版的flash小游戏应用！希望你能收获你想要的快乐！
+Detailed code can be found in the source code below.
 
-# 3 最终效果
-![最终效果](/assets/img/2021/08/game-electron.png)
+# 2 Source Code
 
-# 参考
- - [使用 Pepper Flash 插件](https://www.bookstack.cn/read/electronjs-8.0.0-zh/tutorial-using-pepper-flash-plugin.md)
- - [electron 文档](https://www.electronjs.org/docs)
+github repository: https://github.com/seminelee/electron-flash-linklink
+Just run simple commands and you'll get a desktop version of the flash mini-game app! Hope you get the fun you're looking for!
+
+# 3 Final Result
+
+! [final effect](/assets/img/2021/08/game-electron.png)
+
+# Reference
+
+* [Using the Pepper Flash plugin](https://www.bookstack.cn/read/electronjs-8.0.0-zh/tutorial-using-pepper-flash-plugin.md)
+* [electron documentation](https://www.electronjs.org/docs)

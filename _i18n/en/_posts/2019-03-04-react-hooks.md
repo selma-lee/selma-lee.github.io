@@ -1,28 +1,34 @@
 ---
 layout: post
-title: 认识 react Hooks
+title: Recognizing react Hooks
 date: 2019-03-04 11:23:19
 tags: [React]
 categories:
  - web-framework
 ---
-Hooks是React v16.7.0-alpha中加入的新特性。Hook是一种特殊的函数，允许您“钩入”React特性，让你在class以外使用state和其他React特性。
-总结下来，Hooks主要有三种Hook，它们分别为我们带来了新的特性：
+
+Hooks are a new feature in React v16.7.0-alpha. Hooks are special functions that allow you to "hook" into React features, allowing you to use states and other React features outside of the class.
+To summarize, there are three main types of Hooks, each of which brings us new features:
+
 <!-- more -->
 
-# state Hook 让你可以在函数组件中使用state
-Class有一定的学习成本，你必须了解this如何在JavaScript中工作，类也为今天的工具带来了不少的issue。比如，classes不能很好的被minify。
-而state Hook 让你可以在函数组件中使用state，从而避免以上的问题。
+The # state Hook lets you use state in function components.
 
-用过React的同学可能知道“无状态组件”是这样的：
+Classes have a learning cost, you have to understand how this works in JavaScript, and classes also bring a lot of issues to today's tools. for example, classes can't be minified very well.
+The state Hook lets you avoid these problems by using state in function components.
+
+For those of you who have used React, you may know what a "stateless component" looks like:
+
 ``` js
 const Example = (props) => {
   // You can use Hooks here!
   return <div />;
 }
 ```
-之前将它说成“无状态组件”，主要是因为无法像在class里一样使用state。
-而state Hook可以让你在class以外使用state和其他React特性，现在你可以叫它做函数组件，而不是“无状态组件”了。代码如下：
+
+Previously, we called it a "stateless component" mainly because we couldn't use state like in a class.
+The state Hook allows you to use state and other React features outside of the class, so now you can call it a function component instead of a "stateless component". The code is as follows:
+
 ``` js
 import React, { useState } from 'react';
 
@@ -40,17 +46,22 @@ function Example() {
   );
 }
 ```
-在这段代码中，我们引入了`useState`这个Hook。先将状态初始化为 `{ count: 0 }`, 然后当用户点击含有`this.setState()`的回调函数时，我们计数，改变这个状态。
-__这样写的好处是什么呢？__ 这样，我们就不用写class，也避免了一切class所带来的问题。
 
-`useState`就是一种Hook，我们继续来看其他Hook。
+In this code, we introduce the `useState` Hook. first we initialize the state to `{ count: 0 }`, and then when the user clicks on the callback function containing `this.setState()`, we count and change the state.
+** What's the advantage of writing it this way? ** This way, we don't have to write a class, and we avoid all the problems that come with classes.
 
-# Effect Hook 让你可以根据相关部分将一个组件分割成更小的函数
-然而随着开发的进展组件会变得越来越大、越来越混乱，每个生命周期钩子中都包含了一堆互不相关的逻辑。最终的结果是强相关的代码被分离，反而是不相关的代码被组合在了一起。这显然会导致大量错误。
-Effect Hook 让你可以根据相关部分将一个组件分割成更小的函数，而不是根据生命周期，从而避免以上问题。
-## 挂载和更新时调用effect
-在很多时候，我们想要执行相同的 side effect，不管组件是刚刚挂载，或是刚刚更新。从概念上讲，我们想要它在每次 render 之后执行。
-我们在刚刚的例子中再引入`useEffect`Hook，如下：
+`useState` is one kind of Hook, let's move on to other Hooks.
+
+The # Effect Hook lets you split a component into smaller functions based on related parts
+
+However, as development progresses components become larger and more confusing, with each lifecycle hook containing a bunch of unrelated logic. The end result is that strongly related code is separated, and unrelated code is put together instead. This obviously leads to a lot of errors.
+Effect Hook lets you avoid these problems by splitting a component into smaller functions based on related parts, rather than based on the lifecycle.
+
+## Call effect on mount and update
+
+In many cases, we want to perform the same side effect regardless of whether the component was just mounted or just updated. Conceptually, we want it to be executed after every render.
+We'll reintroduce the `useEffect` Hook in the example we just showed, as follows:
+
 ``` js
 import { useState, useEffect } from 'react';
 
@@ -73,8 +84,10 @@ function Example() {
   );
 }
 ```
-在这段代码中，每一次更新`count`，我们都会通过`document.title`更新页面标题。`useEffect`中的代码会在第一次 render 和 之后的每次 update 后运行。就相当于在`componentDidMount`、`componentDidUpdate`中写一样。
-__那使用它的好处在哪呢？__ 我们可以想一下，如果用class来写上面的代码，则需要在两个生命周期中重复这段代码，如下：
+
+In this code, every time `count` is updated, we update the page title via `document.title`. The code in `useEffect` will run after the first render and every update thereafter. It's equivalent to writing in `componentDidMount`, `componentDidUpdate`.
+** So what are the benefits of using it? ** Let's think about this: if we were to write the above code in a class, we would need to repeat this code in two lifecycles, as follows:
+
 ``` js
 class Example extends React.Component {
   // ...
@@ -88,11 +101,14 @@ class Example extends React.Component {
   // ...
 }
 ```
-而使用`useEffect`的话，React 会记录下你传给 `useEffect` 的这个方法，然后在进行了 DOM 更新之后调用这个方法，这种写法就避免了重复代码了。
 
-## 卸载时清理effect
-在 React class 中，典型的做法是在 `componentDidMount` 里创建订阅，然后在 `componentWillUnmount` 中清除它。
-那用Effect Hook要怎么做呢？在`useEffect`的方法中返回执行清理的函数就可以了。看下面的例子：
+With `useEffect`, React records the method you pass to `useEffect` and calls it after the DOM update, which avoids duplicating code.
+
+## Clean up effect when uninstalling
+
+In the React class, it's typical to create a subscription in `componentDidMount` and then clear it in `componentWillUnmount`.
+So what do you do with an Effect Hook? Just return the function that performs the cleanup in the `useEffect` method. Look at the example below:
+
 ``` js
 import { useState, useEffect } from 'react';
 
@@ -117,10 +133,12 @@ function FriendStatus(props) {
   return isOnline ? 'Online' : 'Offline';
 }
 ```
-__那使用它的好处在哪呢？__ 明显，这让我们让添加和移除订阅的逻辑彼此靠近。它们是同一个 effect 的一部分！
-__那React在什么时候清理 effect呢？__ React 在每次组件 unmount 的时候执行清理。然而，正如我们之前了解的那样，effect 会在 每次 render 时运行，而不是仅仅运行一次。这也就是为什么 React 也会在下次运行 effect 之后清理上一次 render 中的 effect。
 
-如果有多个Effect时，Effect Hook的优势更明显。可以看下面的例子：
+** And what are the benefits of using it? ** Obviously, it allows us to keep the logic of adding and removing subscriptions close to each other. They are part of the same effect!
+** And when does React clean up the effect? ** React performs cleanup every time a component unmounts. However, as we learned earlier, the effect is run every time it's rendered, not just once. That's why React also cleans up the effect from the previous render after the next time the effect is run.
+
+The advantage of Effect Hook is more obvious when there are more than one Effect. You can see the example below:
+
 ``` js
 function FriendStatusWithCounter(props) {
   // 关于计数器的state与effect
@@ -143,12 +161,15 @@ function FriendStatusWithCounter(props) {
   // ...
 }
 ```
-个人觉得比起在class中把逻辑拆分到`componentDidMount`和`componentWillUnmount`，这的确更加清晰了。
 
-# 自定义 Hook 让你跨组件复用stateful logic
-之前，跨组件复用stateful logic(包含状态的逻辑)十分困难。[render props](https://react.docschina.org/docs/render-props.html) 和 [高阶组件](https://react.docschina.org/docs/higher-order-components.html)都要求你重新构造你的组件，这可能会非常麻烦。
-而自定义 Hook 就是用来解决这个问题的。
-我们将上面的例子中的`FriendStatus`改一下，改成能被复用的组件`useFriendStatus`，和复用这个组件的stateful logic的两个组件，`FriendStatus`和`FriendListItem`，如下：
+Personally, I think it does make it clearer than splitting the logic into `componentDidMount` and `componentWillUnmount` in the class.
+
+# Custom Hooks let you reuse stateful logic across components.
+
+Previously, reusing stateful logic across components was difficult. Both [render props](https://react.docschina.org/docs/render-props.html) and [high-level components](https://react.docschina.org/docs/higher-order-components. (. html) both require you to reconstruct your components, which can be tricky.
+Custom Hooks are used to solve this problem.
+Let's change `FriendStatus` in the above example to a component that can be reused, `useFriendStatus`, and two components that reuse the stateful logic of this component, `FriendStatus` and `FriendListItem`, as follows:
+
 ``` js
 import { useState, useEffect } from 'react';
 
@@ -169,6 +190,7 @@ function useFriendStatus(friendID) {
   return isOnline;
 }
 ```
+
 ``` js
 function FriendStatus(props) {
   const isOnline = useFriendStatus(props.friend.id);
@@ -179,6 +201,7 @@ function FriendStatus(props) {
   return isOnline ? 'Online' : 'Offline';
 }
 ```
+
 ``` js
 function FriendListItem(props) {
   const isOnline = useFriendStatus(props.friend.id);
@@ -191,13 +214,15 @@ function FriendListItem(props) {
   );
 }
 ```
-__两个组件使用相同的Hook共享状态吗?__ 不。自定义Hook是一种重用有状态逻辑的机制(例如设置订阅和记住当前值)，但是每次使用自定义Hook时，它内部的所有状态和效果都是完全隔离的。
-__自定义Hook如何获得隔离状态的?__ 因为我们直接调用`useFriendStatus`，从React的角度来看，我们的组件只调用`useState`和`useEffect`。正如我们之前学到的，我们可以在一个组件中多次调用`useState`和`useEffect`，它们将是完全独立的。
 
-# 更多
-这里只简单总结了React Hook几个新特性，更多详情可以看官网
- - [Introducing Hooks](https://react.docschina.org/docs/hooks-intro.html)
- - [Using the State Hook](https://react.docschina.org/docs/hooks-state.html)
- - [Using the Effect Hook](https://react.docschina.org/docs/hooks-effect.html)
- - [Building Your Own Hooks](https://react.docschina.org/docs/hooks-custom.html)
- 
+** Do two components share state using the same Hook? ** No. A custom Hook is a mechanism for reusing stateful logic (e.g., setting up subscriptions and remembering the current value), but every time a custom Hook is used, all of its internal state and effects are completely isolated.
+** How does a custom Hook get isolated state? ** Because we're calling `useFriendStatus` directly, from a React perspective, our component only calls `useState` and `useEffect`. As we learned earlier, we could call `useState` and `useEffect` multiple times in a component and they would be completely independent.
+
+# More
+
+Here's a brief summary of a few of the new features of React Hook, for more details you can see the official website
+
+* [Introducing Hooks](https://react.docschina.org/docs/hooks-intro.html)
+* [Using the State Hook](https://react.docschina.org/docs/hooks-state.html)
+* [Using the Effect Hook](https://react.docschina.org/docs/hooks-effect.html)
+* [Building Your Own Hooks](https://react.docschina.org/docs/hooks-custom.html)
