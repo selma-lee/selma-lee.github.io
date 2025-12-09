@@ -24,7 +24,7 @@ The algorithm for quick sort is briefly described:
 3. Repeat this process for the left and right sides until all sorting is complete.
 
 The example below:
-! [Quick Sort](/assets/img/2018/07/quickSort-1.jpeg)
+![Quick Sort](/assets/img/2018/07/quickSort-1.jpeg)
 Using the idea of recursion it can be realized like this with time complexity O(nlog2n)
 
 ``` js
@@ -52,7 +52,7 @@ quickSort(arr, 0, arr.length - 1)
 However, this implementation declares a number of arrays, which has a higher space complexity and memory footprint.
 Here is a better implementation of sort-in-place.
 Let's start with the motion picture
-! [Quick Sort](/assets/img/2018/07/quickSort-2.gif)
+![Quick Sort](/assets/img/2018/07/quickSort-2.gif)
 Specific implementation:
 
 ``` js

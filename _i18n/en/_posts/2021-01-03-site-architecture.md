@@ -12,7 +12,7 @@ categories:
 
 In large-scale website architecture, a layered architecture is used to slice the website software system in the horizontal aspect into application layer, service layer, and data layer. This is crucial for the website to support high concurrency and develop in the distributed direction afterwards.
 
-* :: Application layer: specific operations and view presentation. (Front-end)
+* Application layer: specific operations and view presentation. (Front-end)
 * Service layer: service support for the application layer. (back-end)
 * Data layer: provide data storage access services.
 
@@ -26,7 +26,7 @@ Segmentation, that is, slicing and dicing the website software system in the ver
 
 One of the main purposes of layering and segmentation is to facilitate distributed deployment of the sliced modules, i.e., different modules are deployed on different servers and work together through remote calls. The common distributed schemes are:
 
-* :: Distributed applications and services. Improves site performance, speeds development, and enables reuse of common services across applications.
+* Distributed applications and services. Improves site performance, speeds development, and enables reuse of common services across applications.
 * Distributed static resources. Static resources are independently distributed deployment, using a separate domain name, that is, separation of dynamic and static.
 * Distributed data and storage. Distributed deployment of relational databases, NoSQL distributed databases.
 * Distributed computing. Hadoop and MapReduce distributed computing framework batch computing.
@@ -41,7 +41,7 @@ After the use of distributed, for the user to access the centralized module, but
 
 Used to improve software performance. Included:
 
-* :: CDN: Content Delivery Network, which caches some static resources (e.g., hot videos with high access in video websites) and returns them to users from the nearest network service provider.
+* CDN: Content Delivery Network, which caches some static resources (e.g., hot videos with high access in video websites) and returns them to users from the nearest network service provider.
 * Reverse proxy: caches static resources of a website to achieve load balancing.
 * Local Cache: caches hot data locally in the application server, which is directly accessed by the application program without accessing the database.
 * Distributed Cache: Cached data requires an increase in memory space, which requires distributed caching, where the application accesses the cached data through network communication.

@@ -38,12 +38,12 @@ Currently, there are open source libraries[ffmpeg.wasm](https://github.com/ffmpe
 * [@ffmpeg/core](https://github.com/ffmpegwasm/ffmpeg.wasm-core): Compile ffmpeg to generate ffmpeg-core.wasm + js glue code.
 * [@ffmpeg/ffmpeg](https://github.com/ffmpegwasm/ffmpeg.wasm): Implements the part of calling the glue code generated in the previous step, and provides load, run and other APIs. provides load, run and other APIs. At the same time, if developers are not satisfied with @ffmpeg/core, they can also build a custom ffmpeg-core.wasm.
 
-! [@ffmpeg/ffmpeg](/assets/img/2021/08/ffmpeg-wasm.png)
+![@ffmpeg/ffmpeg](/assets/img/2021/08/ffmpeg-wasm.png)
 So, can it be used directly? These issues remain to be resolved.
 
 * Browser compatibility: We know that the browser's js thread is single-threaded and mutually exclusive with the rendering thread. In order not to block the rendering of the page and the js main thread,`@ffmpeg/core`When compiling ffmpeg, configure [multithreading](https://emscripten.org/docs/porting/ pthreads.html), resulting in the generated js glue code being used `sharedarraybuffer`. [<<<CODE_119>>>](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer) It can meet the It can meet the data sharing between the main thread and workers, and can also meet the data sharing between multiple workers. It is ideal for use in this scenario. Because of [security issues](https://meltdownattack.com/), all mainstream browsers are disabled by default, and some additional return header fields need to be configured, and [less than ideal support](https://caniuse.com/?search=sharedarraybuffer), cannot meet the online standard.
 
-! [SharedArrayBuffer](/assets/img/2021/08/sharedarraybuffer.png)
+![SharedArrayBuffer](/assets/img/2021/08/sharedarraybuffer.png)
 
 * wasm redundancy:`@ffmpeg/core`compiled `ffmpeg-core.wasm`Includes almost all functions of ffmpeg, [file](https://unpkg.com/@ffmpeg/core@ 0.10.0/dist/ffmpeg-core.wasm)The size is 24MB (8.5MB after gzip), a lot of which is not needed for frame capture.
 
@@ -92,14 +92,14 @@ docker run \
 
 Specifically, languages such as C/C++ are transformed into LLVM intermediate code (IR) through the clang front-end, and then from LLVM IR to wasm. Then the browser downloads WebAssembly, and then passes through the WebAssembly module first, then to the assembly code of the target machine, and then to the machine code (x86/ARM, etc.). target machine, and then to the machine code (x86/ARM, etc.).
 
-! [img](/assets/img/2021/08/emscripten.jpg)
+![img](/assets/img/2021/08/emscripten.jpg)
 
 So, what are LLVM and Clang?
 
 * LLVM means that different front-end and back-end use unified intermediate code LLVM Intermediate Representation (LLVM IR).
 * Clang is a sub-project of LLVM, a C/C++/Objective-C compiler front-end based on the LLVM architecture.
 
-! [img](/assets/img/2021/08/llvm.jpg)
+![img](/assets/img/2021/08/llvm.jpg)
 
 > * Frontend: lexical analysis, syntax analysis, semantic analysis, intermediate code generation
 > * Optimizer: intermediate code optimization (loop optimization, deletion of useless code, etc.).
@@ -229,7 +229,7 @@ const ffmpeg = createFFmpeg({ log: true });
 ```
 
 During this period, we also discovered `-ss`put on `-i`Before, you can intercept frames at a specified time without waiting to read frame by frame, which can improve the screenshot speed. You can view related [API documentation](https://ffmpeg.org/ffmpeg.html).
-You can view related [API documentation](). ! [ffmpeg documentation](/assets/img/2021/08/ffmpeg-api.png)
+You can view related [API documentation](). ![ffmpeg documentation](/assets/img/2021/08/ffmpeg-api.png)
 
 P.S. `@ffmpeg/ffmpeg`Loading and removing is not currently supported.`pthreads`ffmpeg-core.wasm+js has also been mentioned for this library.[pr] (https://github.com/ffmpegwasm/ffmpeg.wasm/pull/235).
 
@@ -240,7 +240,7 @@ The first thing to understand here is that,[JavaScript and C exchange data](http
 
 Therefore, if the parameter is a non-Number type such as a string or array, it needs to be split into the following steps.
 
-* :: use `Module._malloc()`exist `Module` to allocate memory in the heap and obtain the address ptr.
+* use `Module._malloc()`exist `Module` to allocate memory in the heap and obtain the address ptr.
 * Copy string/array and other data into the ptr of memory.
 * Use ptr as a parameter to call the C/C++ function for processing; * use `Module._Module.
 * use `Module._free()`Release ptr.
@@ -377,10 +377,10 @@ const getVideoInfo = async (file) => {
 }
 ```
 
-! [firefox](/assets/img/2021/08/firefox.png)
+![firefox](/assets/img/2021/08/firefox.png)
 
 The current solution that comes to mind is to use [WORKERFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#filesystem-api- The current solution that comes to mind is to use [WORKERFS]( workerfs). WORKERFS runs in a Web Worker and provides read-only access to the File and Blob objects inside the worker without copying the entire data to memory, which meets our needs.
- ! [workerfs](/assets/img/2021/08/workerfs.png)
+ ![workerfs](/assets/img/2021/08/workerfs.png)
 
 # reference
 

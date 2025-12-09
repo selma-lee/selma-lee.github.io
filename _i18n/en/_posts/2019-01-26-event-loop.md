@@ -29,7 +29,7 @@ JavaScript single-threaded tasks are classified as synchronous and asynchronous.
 * Asynchronous tasks go into Event Table and register functions. When the specified thing completes, Event Table moves this function into the task queue. Waiting for the main thread to become idle (execution stack is emptied), tasks from the task queue are read into the stack in order waiting for the main thread to execute them.
 
 As pictured:
-! [Synchronous and asynchronous tasks](/assets/img/2019/02/eventloop-1.png)
+![Synchronous and asynchronous tasks](/assets/img/2019/02/eventloop-1.png)
 
 ## Macro and microtasks
 
@@ -40,7 +40,7 @@ In addition to the broad definition of synchronous and asynchronous tasks, we ha
 
 JS engine first in the macro task queue to take out the first task `execute script`, after the execution of the micro task queue to take out all the tasks in the order of execution; and then take the macro task, and so on until the two queues of tasks are taken out of the loop.
 As shown in the figure:
-! [Macro and micro tasks](/assets/img/2019/02/eventloop-2.png)
+![Macro and micro tasks](/assets/img/2019/02/eventloop-2.png)
 
 ## Overall ##
 
@@ -183,7 +183,7 @@ For highly concurrent solutions, the traditional architecture is a multi-threade
 
 ### The architecture of Nodejs
 
-! [nodejs architecture](/assets/img/2019/02/nodejs-1.jpg)
+![nodejs architecture](/assets/img/2019/02/nodejs-1.jpg)
 Node.js uses V8 as the JavaScript engine and supports event-driven and asynchronous I/O using the efficient libev and libeio libraries.The developers of Node.js have also abstracted the layer libuv on top of libev and libeio.For the POSIX1 operating system, libuv supports event-driven and asynchronous I/O by encapsulating the libev and libeio libraries to utilize epoll or kqueue. For POSIX1, libuv utilizes epoll or kqueue by encapsulating libev and libeio. libuv uses the Windows IOCP mechanism to achieve the same high performance across platforms.
 Event Loop is implemented in libuv.
 
@@ -191,7 +191,7 @@ Event Loop is implemented in libuv.
 
 ### The mechanics of running Nodejs
 
-! [nodejs runtime mechanism](/assets/img/2019/02/nodejs.png)
+![nodejs runtime mechanism](/assets/img/2019/02/nodejs.png)
 The Node.js runtime mechanism is as follows.
 
 * The V8 engine parses JavaScript scripts.
@@ -332,7 +332,7 @@ If the socket or handle is suddenly closed (e.g. `socket.destroy()`), then the '
 * On the Node side, the microtask is executed between stages of the event loop.
 * On the browser side, the microtask is executed after the macrotask of the event loop has been executed
 
-! [Event Loop differences between Nodejs and browsers](/assets/img/2019/02/eventloop-3.png)
+![Event Loop differences between Nodejs and browsers](/assets/img/2019/02/eventloop-3.png)
 
 An example:
 
@@ -352,7 +352,7 @@ setTimeout(()=>{
 ```
 
 Browser-side results:
-! [Browser-side running result:](/assets/img/2019/02/eventloop-browser.gif)
+![Browser-side running result:](/assets/img/2019/02/eventloop-browser.gif)
 
 ``` bash
 timer1
@@ -362,7 +362,7 @@ promise2
 ```
 
 The node side (v10.15.1) runs the result
-! [node-side run results:] (/assets/img/2019/02/eventloop-node.gif)
+![node-side run results:] (/assets/img/2019/02/eventloop-node.gif)
 
 ``` bash
 timer1

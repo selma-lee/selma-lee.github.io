@@ -22,7 +22,7 @@ Because I envy friends around me for having a cool blog, I spent time in the aft
 
 ### Why I'm blogging ###
 
-* :: I am not good at expressing myself, so writing down what is in my head makes me more impressed and improves my ability to make things clear and think logically
+* I am not good at expressing myself, so writing down what is in my head makes me more impressed and improves my ability to make things clear and think logically
 * It helps me to accumulate more knowledge and enjoy the chain reaction brought by sharing.
 * Writing in markdown makes me feel geeky
 
@@ -62,7 +62,7 @@ Enter same passphrase again:<再次输入加密串>
 ```
 
 If you see this screen, you have successfully set up your ssh key.
-! [Successfully set ssh key](/assets/img/2016/07/1.png)
+![Successfully set ssh key](/assets/img/2016/07/1.png)
 
 Note: If you are using a mac, you need to add sudo in front of the command, for details you can see this article [Hexo deployment prompted Fatal: Could not read from remote repository problem handling](https://idealife.github.io/2015/10/02/) Hexo%E9%83%A8%E7%BD%B2%E6%97%B6%E6%8F%90%E7%A4%BAfatal-Could-not-read-from-remote-repository%E7%9A%84%E9%97%AE%E9%A2%98%E5%A4%84%E7%90%86/). E7%90%86/)
 
@@ -71,9 +71,9 @@ Note: If you are using a mac, you need to add sudo in front of the command, for 
 1. Open the local C:\Documents and Settings\Administrator.ssh\id_rsa.pub file. The path may also be C:\Users\Administrator.ssh, you can directly in the C disk to find id_rsa.pub file. The content inside this file is the human key just generated. If you can't see this file, you need to set Show Hidden Files. Open it and copy the contents of this file exactly. 2.
 2. Log in to the github system. Click Image ---> Settings ---> SSH and GPG keys in the upper right corner.
 
-! [Add SSH Key to Github](/assets/img/2016/07/2.png)
+![Add SSH Key to Github](/assets/img/2016/07/2.png)
 3. Click New SSH key in the upper right corner, paste the contents of the locally generated key file you just copied into it (in the Key text box), and click Add SSH key.
-Click Add SSH key and you're done! [Add SSH Key to Github](/assets/img/2016/07/3.png)
+Click Add SSH key and you're done![Add SSH Key to Github](/assets/img/2016/07/3.png)
 
 ### Test it.
 

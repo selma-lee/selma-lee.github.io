@@ -38,8 +38,8 @@ Steps:
 
 The modules are divided into two categories:
 
-* :: One category is Node-supplied modules, i.e., **core modules**.
-* :: The other is user-written modules, namely, **file modules**.
+* One category is Node-supplied modules, i.e., **core modules**.
+* The other is user-written modules, namely, **file modules**.
 
 ## 2.1 Core modules
 
@@ -51,16 +51,16 @@ The core module is divided into two parts:
 
 In the [src](https://github.com/nodejs/node/tree/master/src) directory of the Node project, hereafter referred to as built-in modules. Performance is superior to scripting languages.
 
-* :: Compilation: pre-compiled into a binary file. The `node_extensions.h` file unifies these hashed built-in modules into an array called `node_module_list`.
+* Compilation: pre-compiled into a binary file. The `node_extensions.h` file unifies these hashed built-in modules into an array called `node_module_list`.
 * Load: Use the `get_builtin_module()` method to retrieve them from the `node_module_list`, execute the
 
 **2. js core module (written in js)**
 
 It's in the [lib](https://github.com/nodejs/node/tree/master/lib) directory of the Node project. One class is used as a wrapping and bridging layer for C/C++ built-in modules; the other class is purely functional modules, which don't have to deal with the underlying layers, but are very important.
 
-* :: Compilation: Node uses js2c.py, which comes with V8, to convert all js core modules into a C++ array of strings (the strings are the contents of the js core module files) to generate the `node_natives.h` header file. As mentioned above the process of compiling .js files undergoes header and tail wrapping, and differs from the file module as stated in 2.2.2 in the following ways: the way the source code is fetched (the core modules are loaded from memory) and the location where the execution results are cached.
+* Compilation: Node uses js2c.py, which comes with V8, to convert all js core modules into a C++ array of strings (the strings are the contents of the js core module files) to generate the `node_natives.h` header file. As mentioned above the process of compiling .js files undergoes header and tail wrapping, and differs from the file module as stated in 2.2.2 in the following ways: the way the source code is fetched (the core modules are loaded from memory) and the location where the execution results are cached.
 * Load: take out the above array of strings via `process.binding('natives')` and place it in `nativeModule._source`. Load it directly from memory and execute it. _[P25]_
-    `` js
+    ``` js
     nativeModule._source = process.binding('natives')
     ```
 
@@ -70,7 +70,7 @@ In the core modules, some modules are all written in C/C++; some modules have th
 
 That is, there is a dependency layer relationship where a file module may depend on a core module (Js) and a core module may depend on a built-in module (C/C++). Here is the flow for introducing `os` native modules.
 
-! [P25](https://user-gold-cdn.xitu.io/2020/2/1/16fff891e1381541?w=864&amp;h=862&amp;f=png&amp;s=99119)
+![P25](https://user-gold-cdn.xitu.io/2020/2/1/16fff891e1381541?w=864&amp;h=862&amp;f=png&amp;s=99119)
 
 ## 2.3 Documentation module
 
@@ -90,7 +90,7 @@ C/C++ extension module belongs to the category of file module. Mainly to improve
 
 ## 2.4 Module call stack
 
-! [P33](https://user-gold-cdn.xitu.io/2020/2/1/16fff89c26dfe60d?w=1058&amp;h=562&amp;f=png&amp;s=59670)
+![P33](https://user-gold-cdn.xitu.io/2020/2/1/16fff89c26dfe60d?w=1058&amp;h=562&amp;f=png&amp;s=59670)
 
 Documentation modules include: JS modules and C/C++ extension modules; core modules include: js core modules and C/C++ built-in modules.
 
@@ -104,13 +104,13 @@ It is basically the same as the normal file module, except for the difference in
 
 * CommonJS specification: `Node.JS` follows the `CommonJS` specification. `module.exports = xxx` exports, `require()` introduces. Synchronized loading of modules.
 * AMD: Requirejs' canonicalized output for module definitions, asynchronous module definitions, module loading does not affect the operation of statements following it, dependency fronting. ``define`` definition, ``require`` introduction.
-    `` js
+    ``` js
     require(['clock'],function(clock){
       clock.start();
     });
     ```
 * CMD: Seajs' normalized output for module definitions, synchronized module definitions, dependencies in close proximity. ``define`` definitions, ``require`` introductions.
-    `` * js
+    ``` js
     define(function(require, exports, module) {
        var clock = require('clock');
        clock.start();

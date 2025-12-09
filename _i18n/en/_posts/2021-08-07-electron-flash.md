@@ -14,7 +14,7 @@ However, because of flash's security and other issues, many browsers no longer s
 
 <!-- more -->
 
-! [Can't play anymore](/assets/img/2021/08/game.png)
+![Can't play anymore](/assets/img/2021/08/game.png)
 
 # 1 Solution
 
@@ -154,7 +154,7 @@ Just run simple commands and you'll get a desktop version of the flash mini-game
 
 # 3 Final Result
 
-! [final effect](/assets/img/2021/08/game-electron.png)
+![final effect](/assets/img/2021/08/game-electron.png)
 
 # Reference
 

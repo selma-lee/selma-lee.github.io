@@ -36,7 +36,7 @@ Here is a comparison with Web App and Native App:
 
 The essence of Hybrid App is to use WebView as a container to carry Web pages directly in the native App, which is also called "shell".
 Among them, the core point is the two-way communication layer between the Native end and the H5 end, which can be understood as we need a set of cross-language communication solutions to complete the communication between Native (Java/Objective-c/...) and JavaScript. JavaScript. This solution is __JSBridge__, and the key to realize is as a container of __WebView__, all the principles are based on the WebView mechanism.
-! [Hybrid App](/assets/img/2019/07/hybrid-app-1.jpg)
+![Hybrid App](/assets/img/2019/07/hybrid-app-1.jpg)
 
 > WebView is a webkit engine based , web page display control .
 
@@ -56,17 +56,17 @@ Next, let's take a look at the React Native scenario.
 
 ## General framework
 
-! [React Native](/assets/img/2019/07/react-native.jpeg)
+![React Native](/assets/img/2019/07/react-native.jpeg)
 
-* :: js layer
+* js layer
 
 This layer provides various components for developers to use as well as some tool libraries (event distribution, etc.).
 
-* :: C++ layer
+* C++ layer
 
 Mainly handles java/OC and js communication (JSBridge) and execution of JavaScript (JS script engine).
 
-* :: Native layer (Object C/Java layer)
+* Native layer (Object C/Java layer)
 
 It mainly includes tool libraries such as UI renderer and network communication. There are different implementations according to different operating systems.
 
@@ -118,7 +118,7 @@ Next, let's look at the two-threaded mode of the applet.
 As shown in the figure below, the running environment of the applet is divided into a rendering layer and a logic layer, the WXML templates and WXSS styles work in the rendering layer, and the JS scripts work in the logic layer. The rendering layer and logic layer of the applet are managed by two threads: the rendering layer uses WebView for rendering the interface; the logic layer uses JsCore thread to run the JS scripts.
 There are multiple interfaces in an applet, so there are multiple WebView threads in the rendering layer. This makes the applet closer to the native experience and avoids overloading a single WebView.
 The communication between these two threads is relayed through the WeChat client (Native), and the logic layer sends network requests through Native.
-! [Small program dual-threaded model](/assets/img/2019/07/miniprogram.png)
+![Small program dual-threaded model](/assets/img/2019/07/miniprogram.png)
 
 ## Reason
 
@@ -131,7 +131,7 @@ There are two main reasons for the separation of the rendering and logic layers 
 ## UI rendering
 
 Like RN, applets embody the idea of virtual DOM in page rendering.
-! [Applet page rendering](/assets/img/2019/07/miniprogram-dom.png)
+![Applet page rendering](/assets/img/2019/07/miniprogram-dom.png)
 
 1. First of all, in the rendering layer, the host environment will convert the WXML can to JS object first, and then render the real Dom tree.
 2. When data changes occur in the logic layer, we need to pass the data from the logic layer to the rendering layer through the setData method provided by the host environment.

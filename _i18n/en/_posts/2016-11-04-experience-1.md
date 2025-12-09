@@ -15,10 +15,10 @@ This article is used to record the usual mobile refactoring encountered pitfalls
 
 Pit: Fixed property fails under ios. When you type in the edit box, the soft keyboard will pop up, and the limited screen area of the phone will often cover the input interface.
 As the following screenshot, the image is from [%Phantom#Shadow% - Bloggernacle](https://www.cnblogs.com/cmblogs/p/4448336.html)
-! [Keyboard occlusion affects layout](/assets/img/2016/11/experience-1-2.jpg)
+![Keyboard occlusion affects layout](/assets/img/2016/11/experience-1-2.jpg)
 fix:
 
-* :: Method 1: css set flex:1
+* Method 1: css set flex:1
 
 ``` css
 .container { /* 父类 */
@@ -67,7 +67,7 @@ iframe {
 ## Picture edges appear truncated
 
 Pitfall: image edge truncation on plus machine. The icon pixels are odd, and my predecessor said that mobile icons are required to be even to not have problems.
-! [image edge truncation](/assets/img/2016/11/experience-1-1.jpeg)
+![image edge truncation](/assets/img/2016/11/experience-1-1.jpeg)
 FIX: Edit the image size to an even number!
 P.S. It could also be due to the use of rem. Don't use a specific rem value for the background-size of smaller background images (like some icons), you'll lose the edges after cropping. You should use an element-size cutout and set background-size: contain|cover to scale it.
 

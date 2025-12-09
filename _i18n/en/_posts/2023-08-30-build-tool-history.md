@@ -120,7 +120,7 @@ Webpack later also supported Tree-shaking, which is widely used in medium and la
 # ESM specification native support, esbuild and vite
 
 esbuild supports ES6/CommonJS specifications, Tree Shaking, TypeScript, JSX and other features.
-! [esbuild](/assets/img/2023/08/esbuild.png)
+![esbuild](/assets/img/2023/08/esbuild.png)
 
 You can see that compared to webpack, you can see that the performance is improved by a hundred times. Why so fast?
 
@@ -131,12 +131,12 @@ You can see that compared to webpack, you can see that the performance is improv
 Vite is the next generation of front-end development and building tools. Different processing is done in the development environment and production environment. In the development environment, the bottom layer is based on esBuild for speed up, and in the production environment, rollup is used for Why use rollup for production builds?
 Why use rollup for production builds?
 
-* :: Due to browser compatibility issues and the use of ESM in the actual network may cause the RTT time to be too long, packaging and building are still required .
+* Due to browser compatibility issues and the use of ESM in the actual network may cause the RTT time to be too long, packaging and building are still required .
 
-! [caniuse](/assets/img/2023/08/caniuse.png)
+![caniuse](/assets/img/2023/08/caniuse.png)
 
 * Although esbuild is fast, it has not yet released the 1.0 stable version. In addition, esbuild has weak support for code splitting and css processing, so rollup is still used in production environments.
 
 # reference
 
-* :: [Evolution of front-end build tools](https://juejin.cn/post/7205766006253011004#heading-10)
+* [Evolution of front-end build tools](https://juejin.cn/post/7205766006253011004#heading-10)
